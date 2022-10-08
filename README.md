@@ -68,4 +68,134 @@ Modify transparency with opacity, or again color values.
 
 Download library from [d3js.org](https://d3js.org/). Reference in `index.html`.
 
-To work around CORS issues you might need a server. `live-server` works as a quick workaround.
+! to work around CORS issues you might need a server. [`live-server`](https://www.npmjs.com/package/live-server) works as a quick workaround.
+
+## Data
+
+Structured information with potential for meaning. Text-based data in different formats: `.txt`, `.csv`, `.json`.
+
+### Generate page elements
+
+> refer to the [d3-selection](https://github.com/d3/d3-selection) module
+
+```js
+d3.select("body").append("p").text("Hello world");
+```
+
+Creates a paragraph element and appends the element to the body of the page.
+
+D3 allows to chain functions:
+
+- point to the d3 library and object
+
+- use the select method to target the body element — D3 supports any CSS selector with which you are familiary
+
+- use the append method to create the DOM element and add it to the current selection — the body
+
+- add text in the current selection.
+
+`append` returns the new element so that the current selection no longer refers to the body, it refers to the paragraph.
+
+```js
+const paragraph = d3.select("body").append("p");
+
+paragraph.text("I said hello!");
+```
+
+### Bind data
+
+Data visualization, as noted above, focuses on mapping data to visuals.
+
+Bind data to DOM elements with `.data()`.
+
+Data, like an array of numbers.
+
+```js
+const dataset = [5, 8, 13, 4, 7];
+```
+
+- select the desired HTML elements.
+
+  ```js
+  d3.select("body").selectAll("p");
+  ```
+
+  If there are no elements `selectAll` returns an empty selection.
+
+- use the data method
+
+  ```js
+  d3.select("body").selectAll("p").data(dataset);
+  ```
+
+  `data` counts and parses the data values, executing the code which follows as many times as necessary.
+
+- use the enter method
+
+  ```js
+  d3.select("body").selectAll("p").data(dataset).enter();
+  ```
+
+  `enter` looks at the current — empty — selection and the data values. With more values than DOM elements, the function creates a placeholder element.
+
+- append the DOM node
+
+  ```js
+  d3.select("body").selectAll("p").data(dataset).enter().append("p");
+  ```
+
+  `append` adds a paragraph element bound to the data value. You can access the datum in functions like `text`.
+
+  ```js
+  d3.select("body")
+    .selectAll("p")
+    .data(dataset)
+    .enter()
+    .append("p")
+    .text((d) => `Number ${d}`);
+  ```
+
+  Functions like `text`, `attr`, or again `style` accept a value or an anonymous function. Bound to data, the anonymous function receives as argument the datum.
+
+_Note_: in the demo I append the paragraphs in a `div` container to separate the elements from the previous paragraphs. The choice will become clear in the context of the update-enter-exit selections from a future chapter.
+
+---
+
+Debugging notes:
+
+- `d3.selectAll("p")` returns an object with a `_groups` and `_parents` array
+
+- `_groups` contains a NodeList array
+
+- the NodeList array contains the bound DOM nodes
+
+- the nodes each have a `__data__` attribute with the data values
+
+---
+
+### Data sources
+
+> refer to the [d3-dsv](https://github.com/d3/d3-dsv) module
+
+Beyond a simple array you could retrieve the data from a `.csv`, `.tsv`, `.json` file.
+
+Functions from the D3 library return a promise so that you instruct what to do with the data once the data is fetched.
+
+```js
+d3.csv("dataset.csv").then((dataset) => {
+  console.log(dataset);
+});
+```
+
+With a `.csv` file the first row is treated as the key's row.Values are also included as string.
+
+It is possible to customize the conversion, for instance passing a function as a second argument.
+
+```js
+d3.csv("dataset.csv", (d) => ({
+  name: d.name,
+  age: parseInt(d.age, 10),
+})).then((dataset) => {
+  console.log(dataset);
+});
+```
