@@ -249,3 +249,69 @@ Draw a bar chart with rectangles side by side. Draw a scatter plot over two dime
 ```
 
 Scaling the radius tends to skew the perception of change, of the variation of values giving too much importance to large data points.
+
+## Scales
+
+Functions which map from input domain to output range.
+
+The problem: you don't know the values ahead of time, but you want to have them position/sized/styled according to known value.
+
+D3's approach: set a domain and a range so that the unknown values fit in the known metrics.
+
+Scales have no visual representation, they are just mathematical relations.
+
+d3.scaleLinear maps values linearly — by default an identity scale returning the input value.
+
+```js
+d3.scaleLinear();
+```
+
+Set a domain and a range so that the values are normalized and mapped to the output values.
+
+```js
+const scale = d3.scaleLinear().domain([0, 10]).range([0, 100]);
+
+scale(8); // 80
+```
+
+Use `d3.min`, `max` and `extent` to rapidly find the minimum, maximum, both valules from the input data. Pass an accessor function to consider a value in the input collection instead of the index — default.
+
+```js
+d3.max(dataset, ([x]) => x);
+```
+
+Additional methods allow to customize the scale
+
+- `nice()` rounds the ends of the input domain
+
+- `rangeRound()` instead of range rounds the values returned by the scale
+
+- `clamp()` ensures the scale function doesn't return a value outside of the input domain
+
+Past linearScale there are several scaling functions.
+
+- `scaleSqrt`, square root
+
+- `scalePow`, power
+
+- `scaleLog`, logarithmic
+
+- `scaleQuantize`, outputting to discrete values, buckets
+
+- `scaleQuantile`, from discrete values to discrete values, buckets to buckets
+
+- `scaleOrdinal`, non quantitative output, such as categories
+
+- `scaleTime`, input dates
+
+- `schemeCategory10`, `schemeCategory20`, `schemeCategory20b`, `schemeCategory20c`; presets which output to categorical colors
+
+The root scale helps to size the circle's radius, so to consider the area.
+
+The time scale helps to work with scales, alongside other methods to convert string to Date objects and format Date objects with friendlier labels:
+
+- `d3.timeParse("")`; from string to date
+
+- `d3.timeFormat("")`; from date to string
+
+The input string illustrates the [format](https://github.com/d3/d3-time-format#locale_format) for both functions.
