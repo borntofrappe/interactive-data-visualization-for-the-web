@@ -199,3 +199,53 @@ d3.csv("dataset.csv", (d) => ({
   console.log(dataset);
 });
 ```
+
+## Drawing with data
+
+### HTML
+
+Using div elements, directly with D3 and the style method.
+
+```js
+// bound data
+  .append("div")
+  .style("width", "20px")
+  .style("height", (d) => `${20 + d}px`)
+  .style("display", "inline-block")
+```
+
+With the attr method assign a class to style the bars with CSS. Ultimately use D3 for the properties which depend on the data.
+
+```js
+// bound data
+.append("div")
+  .attr("class", "bar")
+  .style("height", (d) => `${20 + d}px`)
+```
+
+### SVG
+
+Use SVG elements and attributes.
+
+The anonymous function of a bound element receives the datum as first argument, a numeric index value as a second value.
+
+```js
+// bound rectangles
+  .append("rect")
+  .attr("x", (_, i) => i + margin)
+```
+
+The coordinate system with SVG works from the top left corner, with increasing x values moving the system to the right, increase y values to the bottom.
+
+_Note_: I use a bit of SVG trickery to size the vector graphic with the `viewBox` instead of `width` and `height` attributes. With the `viewBox` the width matches the number of data points so that you can give a width of 1 — minus the margin — on a single data point. The height matches the maximum value so that you can use the value directly to size the bars. The trickery will be less relevant once you introduce _scales_.
+
+### Visualizations
+
+Draw a bar chart with rectangles side by side. Draw a scatter plot over two dimensions and with circles. If you bind the data to the size of the circle consider updating the the _area_, not the _radius_.
+
+```js
+-.attr("r", (value) => value)
++.attr("r", (value) => Math.sqrt(value))
+```
+
+Scaling the radius tends to skew the perception of change, of the variation of values giving too much importance to large data points.
