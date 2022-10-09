@@ -315,3 +315,64 @@ The time scale helps to work with scales, alongside other methods to convert str
 - `d3.timeFormat("")`; from date to string
 
 The input string illustrates the [format](https://github.com/d3/d3-time-format#locale_format) for both functions.
+
+## Axes
+
+Axes are functions which do not return something, but generate visual elements. Think line, labels, ticks.
+
+Intented for SVG, since the generated elements are `<line>`, `<path>` and `<text>`.
+
+```pseudo
+d3
+  .axisTop
+  .axisBottom
+  .axisLeft
+  .axisRight
+```
+
+At minimum reference a scale.
+
+```js
+const xAxis = d3.axisBottom(xScale);
+```
+
+Call the function on a group element.
+
+```js
+svg.append("g").call(xAxis);
+```
+
+By calling the function D3 takes the current selection — `<g>` — and passes it to the input function — `xAxis`. In so doing inject the elements for the axis.
+
+Equivalent to the following.
+
+```js
+const xAxisGroup = svg.append("g");
+xAxis(xAxisGroup);
+```
+
+Position the axis by translating the group element.
+
+```js
+svg.append("g").attr("transform", `translate(0 ${height})`).call(xAxis);
+```
+
+Customize the axis on the axis function.
+
+```js
+d3.axisTop(xScale).ticks(5);
+```
+
+Refer to the [`d3-axis`](https://github.com/d3/d3-axis) module for the available methods.
+
+Manually handle the tick values with `tickValues()`
+
+```js
+d3.axisTop(xScale).tickValues([]);
+```
+
+Format tick labels with `tickFormat()`. Similarly to `d3.timeFormat()` use `d3.format()` to customize the number output.
+
+```js
+.tickFormat(d => d3.format(".1%")(d))
+```
