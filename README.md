@@ -376,3 +376,197 @@ Format tick labels with `tickFormat()`. Similarly to `d3.timeFormat()` use `d3.f
 ```js
 .tickFormat(d => d3.format(".1%")(d))
 ```
+
+## Updates, Transitions, and Motion
+
+Updates: how you handle data changes.
+
+Transition and motion: one way you facilitate the perception of change.
+
+### Setup
+
+The visualization plots data with a bar chart.
+
+`d3.scaleBand()` maps a discrete domain to continuous range.
+
+`d3.range()` returns an array from 0 up to the input value. A shortcut to have an array of indexes for the dataset.
+
+Place the bars according to the index in the range set by the visualization's width (and padding).
+
+Customize the scale with `padding()` to add whitespace around the bars.
+
+Use `scale.bandwidth()` to retrieve the width of a band.
+
+### Interaction
+
+Use the `.on` method on a D3 selection. First argument describes the event, second argument a callback.
+
+```js
+viz
+  .append("button")
+  .text("Update")
+  .on("click", () => {});
+```
+
+### Update
+
+Bind the new dataset to the existing elements.
+
+```js
+const groups = dataGroup.selectAll("g").data(dataset);
+```
+
+In this instance there are already group elements.
+
+Update the affected elements in the relevant attributes/styles/content.
+
+```js
+groups
+  .select("rect")
+  .attr("y", (d) => yScale(d))
+  .attr("height", (d) => height - yScale(d));
+
+groups
+  .select("text")
+  .attr("y", (d) => yScale(d) - 8)
+  .text((d) => d);
+```
+
+### Transitions
+
+Add the transition() method _before_ the affected properties/attributes.
+
+```js
+groups
+  .select("rect")
+  .transition()
+  .attr("y", (d) => yScale(d))
+  .attr("height", (d) => height - yScale(d));
+```
+
+D3 automatically interpolates numerical values.
+
+The transition takes place if there is already an existing value.
+
+```js
+groups.select("rect").attr("opacity", 1).transition().attr("opacity", 0);
+```
+
+Customize the transition with the `duration()`, `delay()`, `ease()` methods.
+
+```js
+groups.select("rect").transition().duration(500);
+```
+
+Use a single value or a function, in which instance you can tap into the datum and the index of the element in the bound selection.
+
+```js
+groups
+  .select("rect")
+  .transition()
+  .delay((_, i) => i * 25);
+```
+
+To accommodate for an unknown number of element set up a scale to avoid an excessively large delay.
+
+### Update scales
+
+The scales are set to map a domain to a range. In the moment the domain depends on the values of the dataset and these change you need to update the scale to match.
+
+```js
+yScale.domain([0, d3.max(dataset)]).nice();
+```
+
+### Update axes
+
+As axes depend on scales update the visuals by calling the axis function on the existing group element.
+
+```js
+axisGroup.select(".y-axis").transition().duration(500).call(yAxis);
+```
+
+`yAxis` calls the function which in turns refers to the updated scale.
+
+### Transition events
+
+Use the `.on` method to tap into the phases of the transition. `start` describes the beginning of the transition, `end` opposite end.
+
+```js
+groups
+  .select("rect")
+  .transition()
+  .on("start", () => {
+    // do something
+  })
+  .on("end", () => {
+    // do something else
+  })
+  .attr("y", (d) => yScale(d))
+  .attr("height", (d) => height - yScale(d));
+```
+
+Be warned that D3 interpolates the values of one transition at a time, the last one. If you start a new one, it takes over existing changes.
+
+You can have a transition on the callback at the `end` event, but D3 allows to chain transitions by adding multiple transition methods.
+
+```js
+groups
+  .select("rect")
+  .transition()
+  .attr("y", height)
+  .attr("height", 0)
+  .transition()
+  .attr("y", (d) => yScale(d))
+  .attr("height", (d) => height - yScale(d));
+```
+
+### Clip aside
+
+Use a `clipPath` element to have visuals clipped to a specific area — relevant if you decide to animate values out the visible area before removing them, or positioning them in the visible area after adding them outside of it.
+
+### Update selections
+
+> the function modifies the visualization to assign a unique identifier to the data points
+
+Data might be variable not only in value, but in number. In this instance you may need to add/remove DOM nodes.
+
+In this instance the data method returns a more complex update selection, one with enter and exit _subselections_.
+
+```js
+const selection = group.selectAll("g").data(dataset);
+```
+
+Choose how to handle the flow of data with the `.enter()`, `.exit()` methods.
+
+```js
+// existing elements for possibly changed values
+selection.attr("transform", (d, i) => `translate(${xScale(i)} 0)`); // ...
+
+// new elements for unbound values
+selection.enter().append("g"); // ...
+
+// old elements without a corresponding value
+selection.exit().remove;
+```
+
+Merge the enter and update selection if the two share properties you want to change in the same manner.
+
+```js
+selection.enter().append("g").merge(selection).attr("x"); // ...
+```
+
+_Note_: in the demo I ultimately chose to keep the selections separate to manage the data flow. If a data point is added the function introduces the new node and only afterwards it updates the position of the previous elements, if necessary. If a data point is removed the function removes the element and, once transitioned and removed, it repeats the same kind of update.
+
+### Data joins with keys
+
+By default elements are bound of the basis of index.
+
+To have data bound to specific elements introduce a key, an identifier for each data point.
+
+Refer to the key in the second argument of the data method, a callback function which has access to the data to-be-bound.
+
+```js
+.data(dataset, ({key}) => key)
+```
+
+Once you remove a data point on the basis of key you remove the matching node, no longer the last one.
