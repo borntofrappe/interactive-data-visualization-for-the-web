@@ -570,3 +570,96 @@ Refer to the key in the second argument of the data method, a callback function 
 ```
 
 Once you remove a data point on the basis of key you remove the matching node, no longer the last one.
+
+## Interactivity
+
+As per the previous demo:
+
+- bind event listener
+
+- define behavior with a callback function
+
+```js
+d3.select("button").on("click", () => {});
+```
+
+The callback function receives the event as the first argument, the bound datum as the second.
+
+```js
+d3.selectAll("rect").on("mouseenter", (e, d) => {
+  console.log(d);
+});
+```
+
+To change the color on hover use CSS.
+
+```css
+g:hover {
+  fill: tomato;
+}
+```
+
+With D3 change the same property with the `mouseenter` event. In this instance you need access to the element itself. Use `d3.select(this)` in a function which does not use arrow syntax.
+
+```js
+dataGroup.selectAll("g").on("mouseenter", function (e, d) {
+  d3.select(this).transition().attr("fill", "tomato");
+});
+```
+
+The arrow syntax would not bind the element, so that `d3.select(this)` would refer to the window's object.
+
+Use `mouseleave` to restore the default value.
+
+```js
+dataGroup.selectAll("g").on("mouseleave", function (d) {
+  d3.select(this).attr("fill", "hsl(0, 0%, 75%)");
+});
+```
+
+### Sort
+
+Use the `.sort()` method to reorder the elements on the basis of data.
+
+Use `d3.ascending()` — or `d3.descending()` — to delegate the sorting to the D3 library.
+
+```js
+dataGroup
+  .selectAll("g")
+  .sort((a, b) => d3.ascending(a, b))
+  .attr("transform", (d, i) => `translate(${xScale(i)} 0)`);
+```
+
+If the datum are more complex than numbers you'd refer to the values in the sorting function.
+
+### Named transitions
+
+In the moment you transition the color of the rectangles on hover and transition their position when the button is clicked the change in the `x` coordinate might stop if you were to hover on the bar — only one transition at a time.
+
+Get around this by adding a name to the transition.
+
+```js
+dataGroup.selectAll("g").on("mouseenter", function (e, d) {
+  d3.select(this).transition("fill").attr("fill", "tomato");
+});
+```
+
+Programmatically stop the transition referring to the transition by name.
+
+```js
+d3.selectAll("g").interrupt("fill");
+```
+
+### Tooltips
+
+Overlays with additional information. Details.
+
+1. browser default: `<title>` element
+
+2. SVG: vector graphics such as `<text>` elements; handle interaction on hover, for instance creating the label on `mouseover` and destroying the element on `mouseout`
+
+3. HTML: hidden, absolute positioned `<div>` element; handle interaction on hover, displaying and placing the node above the chart. It helps to have a `<div>` container for the tooltip and visualization, so to handle the relative-absolute position pair
+
+For specific coordinates consider [`d3.pointer`](https://github.com/d3/d3-selection/blob/main/README.md#pointer).
+
+Beyond mouse events, consider touch events such as `touchstart` and `touchend`.
