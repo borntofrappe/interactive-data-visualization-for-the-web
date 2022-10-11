@@ -663,3 +663,70 @@ Overlays with additional information. Details.
 For specific coordinates consider [`d3.pointer`](https://github.com/d3/d3-selection/blob/main/README.md#pointer).
 
 Beyond mouse events, consider touch events such as `touchstart` and `touchend`.
+
+## Paths
+
+Helper D3 functions to generate the syntax for the `d` attribute of `<path>` elements.
+
+### Line
+
+Use `d3.line()` to create a function which creates the syntax for a line on the basis of input values.
+
+Specify the horizontal and vertical coordinates with the `.x()` and `.y()` methods.
+
+```js
+d3.line()
+  .x((d) => xScale(d.date))
+  .y((d) => yScale(d.value));
+```
+
+Use the `.datum()` method — instead of `.data()` — to bind a single element to the array of values.
+
+```js
+dataGroup.append("path").datum(dataset).attr("d", line);
+```
+
+---
+
+The following would draw the line, but would **not** bind the data to the element.
+
+```js
+dataGroup.append("path").attr("d", line(dataset));
+```
+
+If you were to inspect `d3.select('path')` you would not find the `__data__` property alongide the element's attributes.
+
+---
+
+Use the `.defined()` method to limit the values on which the function is applied.
+
+```js
+const line1 = d3
+  .line()
+  .defined((d) => d.value <= mean)
+  .x((d) => xScale(d.date))
+  .y((d) => yScale(d.value));
+```
+
+### Area
+
+Use `d3.area()` similarly to `d3.line()`. Specify two values for the vertical — or horizontal — coordinate so that the area is drawn in the gap between the two values.
+
+```js
+const area = d3
+  .area()
+  .x((d) => xScale(d.date))
+  .y0(height)
+  .y1((d) => yScale(d.value));
+```
+
+The `.defined()` method works exactly like for the line function.
+
+```js
+const area1 = d3
+  .area()
+  .defined((d) => d.value <= mean)
+  .x((d) => xScale(d.date))
+  .y0(height)
+  .y1((d) => yScale(d.value));
+```
