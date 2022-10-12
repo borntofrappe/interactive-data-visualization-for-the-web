@@ -143,8 +143,7 @@ const vizStackArea = async () => {
     .area()
     .x((d) => xScale(timeParse(d.data["Year"])))
     .y0((d) => yScale(d[0]))
-    .y1((d) => yScale(d[1]))
-    .curve(d3.curveBasis);
+    .y1((d) => yScale(d[1]));
 
   const viz = d3.select("body").append("div");
 
@@ -161,12 +160,11 @@ const vizStackArea = async () => {
   const dataGroup = svg.append("g");
 
   const dataGroups = dataGroup
-    .selectAll("g")
+    .selectAll("path")
     .data(stackDataset)
     .enter()
-    .append("g")
-    .attr("fill", (_, i) => scaleColor(i))
     .append("path")
+    .attr("fill", (_, i) => scaleColor(i))
     .attr("d", area);
 };
 

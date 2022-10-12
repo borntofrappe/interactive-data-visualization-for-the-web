@@ -890,3 +890,248 @@ groups.selectAll("rect").each((d) => {
   // do something
 });
 ```
+
+## Layouts
+
+D3 maps, transforms data for you to lay out. As with the line function, D3 does not draw the line, but gives you the syntax for the `d` attribute of the `<path>` element.
+
+### Pie
+
+Use the `pie` function to compute the start and end angle of the slices.
+
+Use the `arc` function to take a start and end angle, as well inner and outer radius, to produce the syntax for the `d` attribute of `<path>` elements.
+
+With the bound data invoke the arc function for the `d` attribute.
+
+```js
+.data(pieDataset)
+.enter()
+.append('path')
+.attr('d', arc)
+```
+
+The data is passed automatically so that the following lines achieve the same goal.
+
+```js
+.attr('d', arc)
+.attr('d', d => arc(d))
+```
+
+Set an inner radius greater than zero for a donut chart.
+
+Position labels with `arc.centroid(d)`. The function computes the center point of any shape for the specific arc function.
+
+The actual data is stored in the `d.value` field.
+
+```js
+.text(d => d.value)
+```
+
+A note on the _order_ of the slices: the pie-d data computes the start and end angle so that the larger value starts and angle 0 and moves clockwise. It does **not** modify the order of the values in the array.
+
+```js
+console.log(dataset);
+console.log(pie(dataset));
+```
+
+The two arrays list the values in the same order.
+
+If you assign colors on the basis of index and want to ensure the first color goes to the largest slice you need to sort the original dataset as well.
+
+```js
+dataset.sort((a, b) => b - a);
+```
+
+### Colors
+
+D3 provides array of colors such as `d3.schemeCategory10`. Include the values in an ordinal scale to map index values to one of the colors from the array.
+
+```js
+const scaleColor = d3.scaleOrdinal(d3.schemeCategory10);
+```
+
+### Stack
+
+Stack function converts 2D data to stacked data. Adds a baseline so you can draw columns, areas.
+
+Assume an array of objects, each describing the values with a series of properties, keys.
+
+```js
+const data = [
+  { Year: "2010", Germany: 259, Sweden: 395, France: 205 },
+  { Year: "2011", Germany: 284, Sweden: 286, France: 261 },
+  // ...
+];
+```
+
+Describe the keys on which to stack the data with the keys method.
+
+```js
+const stack = d3.stack().keys(['Germany', 'Sweden', 'France]);
+```
+
+D3 transforms the data to a two dimensional array, with the baseline and value added to said baseline. Use the two to draw visuals.
+
+```js
+[
+  [0, 259, data: { Year: '2010', Germany: 259, Sweden: 395, France: 205}],
+  [0, 284, data: { Year: '2011', Germany: 284, Sweden: 286, France: 261}],
+],
+[
+  [259, 654, data: { Year: '2010', Germany: 259, Sweden: 395, France: 205}],
+  [284, 570, data: { Year: '2011', Germany: 284, Sweden: 286, France: 261}],
+],
+```
+
+The challenge is mapping the values with the horizontal and vertical scale/dimension
+
+For the stacked columns bind the stacked data to group elements. The first set of arrays refer to the values for each category, so it is safe to set a fill color, shared by all visuals with same key.
+
+```js
+const dataGroups = dataGroup
+  .selectAll("g")
+  .data(stackDataset)
+  .enter()
+  .append("g")
+  .attr("fill", (_, i) => scaleColor(i));
+```
+
+Bind a portion of the bound data to rectangle element.
+
+```js
+dataGroups
+  .selectAll("rect")
+  .data((d) => d)
+  .enter()
+  .append("rect");
+```
+
+In this instance `d` refers to the 2D array with the cumulative values (and the `data` property with the values for the keys).
+
+For the area the process is similar, but here you need to map the values through the area function `.x()` and `.y()` methods. In the demo I use the year value for the horizontal coordinate, the two cumulative values for the veertical coordinates, start and end.
+
+```js
+const area = d3
+  .area()
+  .x((d) => xScale(timeParse(d.data["Year"])))
+  .y0((d) => yScale(d[0]))
+  .y1((d) => yScale(d[1]));
+```
+
+In this instance pass the stacked data directly to the path elements.
+
+```js
+const dataGroups = dataGroup
+  .selectAll("path")
+  .data(stackDataset)
+  .enter()
+  .append("path")
+  .attr("fill", (_, i) => scaleColor(i))
+  .attr("d", area);
+```
+
+In this manner the area function receives the array of values for the separate categories.
+
+By default data is stacked per the keys array. Use a different logic with the order method and functions such as d3.stackOrderAscending, placing the values from smaller to larger (these might have undesired effects if you were to color the stacks on the basis of index).
+
+### Force
+
+Set up a force simulation to display network (graph) data. Assume data described in _nodes_ and _links_, connections.
+
+```js
+const nodes = [
+  { body: "Sun" },
+  { body: "Mars" },
+  { body: "Deimos" },
+  { body: "Phobos" },
+];
+
+const links = [
+  { source: "Sun", target: "Mars" },
+  { source: "Mars", target: "Deimos" },
+  { source: "Mars", target: "Phobos" },
+];
+```
+
+The goal is to plot the nodes and connections, for instance with circle and lines. This is achieved in two steps:
+
+1. draw the necessary visuals, in the demo circle, text and path elements
+
+2. run a simulation to update the elements' position
+
+For the simulation use `d3.forceSimulation()`.
+
+```js
+const force = d3.forceSimulation(nodes);
+```
+
+Add forces to change the nodes position.
+
+Forces are connected to D3 functions from the force module. Forces such as
+
+- charge, push nodes away from (-) or toward (+) each other. Repulsion v attraction
+
+- link, connect nodes together (this is the purpose of the links array)
+
+- center, push the nodes toward a specific x and y coordinate
+
+```js
+const force = d3
+  .forceSimulation(nodes)
+  .force("charge", d3.forceManyBody().strength(-200))
+  .force(
+    "link",
+    d3.forceLink(links).id((d) => d.body)
+  )
+  .force(
+    "center",
+    d3
+      .forceCenter()
+      .x(size / 2)
+      .y(size / 2)
+  );
+```
+
+Once the simulation is set up the data is modified, `nodes` and `links`, so that the nodes and have a velocity (`vx` and `vy`) and a position (`x` and `y`).
+
+```js
+{
+    "body": "Mars",
+    "index": 1,
+    "x": 169.15673121265638,
+    "y": 349.79798252634413,
+    "vy": 0.00046444094003472296,
+    "vx": -0.001414957059110836
+}
+```
+
+The links have a `source` and `target` key, each with a similar structure.
+
+```js
+// source
+{
+    "body": "Mars",
+    "index": 1,
+    "x": 169.15673121265638,
+    "y": 349.79798252634413,
+    "vy": 0.00046444094003472296,
+    "vx": -0.001414957059110836
+}
+// target
+{
+    "body": "Deimos",
+    "index": 2,
+    "x": 152.14695784173583,
+    "y": 402.4101640753646,
+    "vy": 0.0005742405884061712,
+    "vx": -0.001837542543293243
+}
+```
+
+Listen to the `tick` event to consider the updated values.
+
+```js
+force.on("tick", () => {
+  nodesGroups.attr("transform", (d) => `translate(${d.x} ${d.y})`);
+});
+```
