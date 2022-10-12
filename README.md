@@ -730,3 +730,163 @@ const area1 = d3
   .y0(height)
   .y1((d) => yScale(d.value));
 ```
+
+## Selections
+
+Mostly a theorical chapter to illustrate selections.
+
+### Properties
+
+- each selection has a `_groups` property (among other such as `_parents` and `_proto`)
+
+- each `_groups` describe the element(s) of the selection
+
+  ```js
+  d3.select("body"); // _groups contains the body element
+  ```
+
+- a selection is an object
+
+  ```js
+  typeof d3.select("body"); // object
+  ```
+
+- if the element is bound the element includes a `__data__` property with the bound value
+
+  ```js
+  d3.select("path"); // _groups, path, __data__
+  ```
+
+- multiple, bound elements each have a `__data__` property with the bound datum
+
+  ```js
+  d3.selectAll("circle"); // _groups, array of circles, circle, __data__
+  ```
+
+### Specificity
+
+Select a specific node either with a stricter selector.
+
+```js
+d3.selectAll("svg > g circle");
+```
+
+Or, by chaining `.select()` methods — helps if you want to modify different elements as you select them.
+
+```js
+d3.select("svg")
+  .select("g")
+  .attr("opacity", "1")
+  .selectAll("circle")
+  .attr("fill", "hotpink");
+```
+
+The `.select()`, `.selectAll()` and `.append()` methods hand off the new selection to the methods which follow. Other methods such as `.attr()` and `.text()` do not.
+
+One way to differentiate selections is through indentation.
+
+### Storing selections
+
+Selections are immutable. You can however override the value of a variable with a new selection.
+
+```js
+let groups = svg.selectAll("g");
+
+groups = svg.select("g").selectAll("g");
+```
+
+If stored in a variable the reference is to the _last_ selection in the chain.
+
+### Data join
+
+When you bind data the selection object contains _subselections_.
+
+```js
+svg.selectAll("rect"); // empty selection
+svg.selectAll("rect").data(dataset); // _enter, _exit subselections
+```
+
+The subselections have an array of a certain length.
+
+Consider the enter selection.
+
+```js
+svg.selectAll("rect").data(dataset).enter();
+```
+
+When the visualization is first initialized the array contains a list of objects. These are placeholders with a `__data__` property.
+
+Once you append the elements and bind the data to said elements the selection is an array of elements. No longer placeholders, but each with a `__data__` property
+
+```js
+svg.selectAll("rect").data(dataset).enter().append("rect");
+```
+
+When you rebind the data _without_ changing the number of values the enter subselection is always an array, but an array of empty slots. This is how D3 knows the number of existing and new elements.
+
+```js
+svg.selectAll("rect").data(dataset).enter();
+```
+
+When you increase the number of values the enter selection contains the empty slots _and_ new objects. In this manner you add elements only for the placeholder nodes.
+
+```js
+dataset.push(value);
+svg.selectAll("rect").data(dataset).enter();
+```
+
+Consider now the exit selection. When the dataset doesn't change in number or else increases the array has only empty slots.
+
+```js
+svg.selectAll("rect").data(dataset).exit();
+```
+
+When removing a value the array lists the elements to-be-removed.
+
+```js
+dataset = dataset.slice(0, -2);
+svg.selectAll("rect").data(dataset).exit();
+```
+
+Remove the elements and the `.remove()` method returns the affected elements.
+
+```js
+svg.selectAll("rect").data(dataset).exit().remove(); // rect
+```
+
+Finally, consider the `merge()` method used to unite the new elements from the enter selection with the existing values.
+
+```js
+const bars = svg.selectAll("rect").data(dataset);
+
+bars.enter().append("rect").attr("...", "...").merge(bars);
+```
+
+The collection lists all the now-bound elements.
+
+### Filter
+
+Filter selection on the basis of data.
+
+The condition works just like those used to style the elements differently.
+
+```js
+groups
+  .selectAll("rect")
+  .filter((d) => d > 40)
+  .attr("stroke", "currentColor")
+  .attr("stroke-width", "2")
+  .attr("stroke-dasharray", "10 5");
+```
+
+Helps to avoid repeating the same condition in multiple methods.
+
+### Each
+
+Use the .each method to run a function on each node of the current selection.
+
+```js
+groups.selectAll("rect").each((d) => {
+  // do something
+});
+```
