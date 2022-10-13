@@ -1135,3 +1135,36 @@ force.on("tick", () => {
   nodesGroups.attr("transform", (d) => `translate(${d.x} ${d.y})`);
 });
 ```
+
+## Geomapping
+
+Use GeoJSON, a specific format of JSON syntax which summarizes geographical data — think map coordinates.
+
+### Map
+
+Use `d3.geoPath()` with a specific projection.
+
+```js
+const path = d3.geoPath().projection(projection);
+```
+
+The function transforms map coordinates to the `d` attribute of `<path>` elements.
+
+```js
+svg
+  .selectAll("path")
+  .data(json.features)
+  .enter()
+  .append("path")
+  .attr("d", path);
+```
+
+With the projection describe how to plot the coordinates in the 2D space.
+
+```js
+const projection = d3.geoAlbersUsa();
+```
+
+### Choropleth
+
+### Points
