@@ -1151,7 +1151,7 @@ const path = d3.geoPath().projection(projection);
 The function transforms map coordinates to the `d` attribute of `<path>` elements.
 
 ```js
-svg
+dataGroup
   .selectAll("path")
   .data(json.features)
   .enter()
@@ -1203,3 +1203,54 @@ const [x, y] = projection([d.lon, d.lat]);
 ```
 
 The projection function receives an array with the longitude and latitude. Based on the two value the function returns the x and y coordinates.
+
+### Pan
+
+One way to move the map is to translate the projection.
+
+```js
+projection.translate([x, y]);
+```
+
+Once you have ou update the projection update the visuals and the attributes which rely on said function, for instance the countries.
+
+```js
+dataGroup.selectAll("path").transition().attr("d", path);
+```
+
+### Drag
+
+Instead of translating the map by fixed measures allow to drag with the `d3.drag()` function.
+
+Superimpose a rectangle to track mouse interaction anywhere on the vector.
+
+```js
+svg
+  .append("rect")
+  .attr("width", width)
+  .attr("height", height)
+  .attr("opacity", "0")
+  .style("cursor", "pointer");
+```
+
+On the rectangle use the call method to pass a drag function - see past the snippet. As with the axis function call executes the input function with the current selection - the rectangle.
+
+```js
+svg.append("rect").call(drag);
+```
+
+For the dragging feature d3.drag allows to set up the behavior by listening to different events: `start`, `end`, `drag`.
+
+```js
+const drag = d3.drag().on("drag", (e) => {});
+```
+
+The event passed through the function provides dragging details, among which dx and dy for the change in either direction
+
+```js
+const drag = d3.drag().on("drag", (e) => {
+  const { dx, dy } = e;
+});
+```
+
+Use these values to translate the elements.
