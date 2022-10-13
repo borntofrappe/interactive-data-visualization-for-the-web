@@ -1167,4 +1167,39 @@ const projection = d3.geoAlbersUsa();
 
 ### Choropleth
 
+Color areas according to a value.
+
+For the colors use `d3.scaleQuantize`. With the function map a continuous domain, from the minimum to the maximum value of the dataset, to a _discrete_ range, picking one of the input colors.
+
+```js
+const scaleColor = d3
+  .scaleQuantize()
+  .domain(d3.extent(json.features, (d) => d.properties.value))
+  .range([
+    "rgb(237,248,233)",
+    "rgb(186,228,179)",
+    "rgb(116,196,118)",
+    "rgb(49,163,84)",
+    "rgb(0,109,44)",
+  ]);
+```
+
+The data is retrieved from `us-ag-productivity.csv` and added, where possible, to the features in the `json` object.
+
+When drawing the state color the shape per the state's value, or a fallback value if one is not provided (not all states are represented in the csv dataset).
+
+```js
+.attr("fill", (d) =>
+  d.properties.value ? scaleColor(d.properties.value) : "hsl(0, 0%, 30%)"
+)
+```
+
 ### Points
+
+Given a dataset describing large cities as well as the population and coordinates (longitude and latitude), use the projection to position circles in the appropriate spot.
+
+```js
+const [x, y] = projection([d.lon, d.lat]);
+```
+
+The projection function receives an array with the longitude and latitude. Based on the two value the function returns the x and y coordinates.
