@@ -1254,3 +1254,98 @@ const drag = d3.drag().on("drag", (e) => {
 ```
 
 Use these values to translate the elements.
+
+### Zoom
+
+Use` d3.zoom` in place of `d3.drag`.
+
+```js
+svg.append("rect").call(zoom);
+```
+
+With the function listen to events such as `start`, `end` and `zoom`.
+
+```js
+const zoom = d3.zoom().on("zoom", function (e) {});
+```
+
+The event provides `x` and `y` coordinates, so you can re-implement the panning feature of the previous section, as well as `k`, a scale factor. The values are available in the `transform` property.
+
+```js
+const zoom = d3.zoom().on("zoom", function (e) {
+  const { x, y, k } = e.transform;
+});
+```
+
+Unlike the dragging feature, d3.zoom stores the zoom value _in_ the node. Consider how their might be different sections of the visualization at different level of depth.
+
+Retrieve the zoom value of a node with `d3.zoomTransform()` passing the node as argument (the property itself is stored in the `__zoom` field).
+
+```js
+const zoom = d3.zoom().on("zoom", function (e) {
+  console.log(d3.zoomTransform(d3.select(this).node()));
+});
+```
+
+Back to the demo, multiply `k`, the scaling factor, by the initial scale set on the projection.
+
+```js
+const initialScale = projection.scale();
+```
+
+Update the scale similarly to how you update the translate portion of the same projection function.
+
+```js
+projection.translate([x, y]).scale(k * initialScale);
+```
+
+A note on the translate values. The projection has initial values for the `x` and `y` coordinates, meaning the map would immediately jump to the top left corner as the projection contemplates `e.transform.x` and `e.transform.y` as starting from 0. To compensate for this, and on the basis of the desired, initial translation, invoke an additional function to update the values.
+
+```js
+const [initialX, initialY] = projection.translate();
+
+svg
+  .append("rect")
+  .call(zoom)
+  .call(zoom.transform, d3.zoomIdentity.translate(initialX, initialY));
+```
+
+In this manner `e.transform.x` and `e.transform.y` start from the same coordinate set on the first projection.
+
+`d3.zoomIdentity` provides an identity transform. one where the scaling factor `k` is 1 and the two coordinates are 0. Consider it a default, a basis transform on top of which you set the desired scale and translate values.
+
+Listening to the `zoom` covers mouse and touch interaction. To reproduce the buttons from the pan section, which update the position by an arbitrary amount, update the zoom directly with the `.translateBy()` method.
+
+```js
+svg.select("rect").transition().call(zoom.translateBy, x, y);
+```
+
+Manually updating the projection would create a disconnect with the zoom values bound to the element, meaning a following interaction would have the visualization stutter.
+
+To scale by an arbitrary amount use the `.scaleBy()` method.
+
+```js
+svg.select("rect").transition().call(zoom.scaleBy, 1.5);
+```
+
+To reset the projection apply the same identity matrix used when first calling the `zoom()` function.
+
+```js
+svg
+  .select("rect")
+  .transition()
+  .call(zoom.transform, d3.zoomIdentity.translate(initialX, initialY));
+```
+
+Finally, constrain the scale and translate values on the `zoom` function itself and through the `.scaleExtent()` and `.translateExtent()` methods.
+
+```js
+const zoom = d3
+  .zoom()
+  .scaleExtent([0.5, 3])
+  .translateExtent([
+    [width * -1, height * -1],
+    [width, height],
+  ])
+  .on("zoom", function (e) {});
+```
