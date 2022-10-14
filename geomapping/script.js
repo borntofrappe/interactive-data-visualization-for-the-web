@@ -412,6 +412,7 @@ const vizZoom = () => {
     });
 };
 
+// REQUIRES A SERVER TO BYPASS CORS ISSUE
 const viz = async () => {
   json = await d3.json("us-states.json");
   dataProductivity = await d3.csv(

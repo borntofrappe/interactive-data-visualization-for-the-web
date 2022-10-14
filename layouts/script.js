@@ -316,6 +316,8 @@ const vizForce = () => {
 const viz = async () => {
   vizForce();
   vizPie();
+
+  // REQUIRE A SERVER TO BYPASS CORS ISSUE
   await vizStackBars();
   await vizStackArea();
 };

@@ -8,7 +8,7 @@ Mapping information to visuals — think mapping larger values to taller bars.
 
 Why interactive? Why data? Why visualizations? Why the web? Reasons, reasons, reasons, reasons!
 
-A great medium able to convey information which an incredible degree of effectiveness.
+A great medium able to convey information with an incredible degree of effectiveness.
 
 Ben Shneiderman "Visual Information-Seeking Mantra": _Overview first, zoom and filter, then details on demand._
 
@@ -40,7 +40,7 @@ Dynamic pages. Console, variables, data types, arrays, objects
 
 Arrays as sequence of values. Objects with properties and values.
 
-JSON JavasSript object notation. GeoJSON, geographic javascript object notation.
+JSON, JavaScript object notation. GeoJSON, geographic javascript object notation.
 
 Mathematical operators, comparison operators.
 
@@ -68,7 +68,7 @@ Modify transparency with opacity, or again color values.
 
 Download library from [d3js.org](https://d3js.org/). Reference in `index.html`.
 
-! to work around CORS issues you might need a server. [`live-server`](https://www.npmjs.com/package/live-server) works as a quick workaround.
+To work around CORS issues you might need a server. [`live-server`](https://www.npmjs.com/package/live-server) works as a quick workaround.
 
 ## Data
 
@@ -88,7 +88,7 @@ D3 allows to chain functions:
 
 - point to the d3 library and object
 
-- use the select method to target the body element — D3 supports any CSS selector with which you are familiary
+- use the select method to target the body element — D3 supports any CSS selector with which you are familiar
 
 - use the append method to create the DOM element and add it to the current selection — the body
 
@@ -227,7 +227,7 @@ With the attr method assign a class to style the bars with CSS. Ultimately use D
 
 Use SVG elements and attributes.
 
-The anonymous function of a bound element receives the datum as first argument, a numeric index value as a second value.
+The anonymous function of a bound element receives the datum as the first argument, a numeric index value as the second value.
 
 ```js
 // bound rectangles
@@ -235,13 +235,13 @@ The anonymous function of a bound element receives the datum as first argument, 
   .attr("x", (_, i) => i + margin)
 ```
 
-The coordinate system with SVG works from the top left corner, with increasing x values moving the system to the right, increase y values to the bottom.
+The coordinate system with SVG works from the top left corner, with increasing x values moving the system to the right, increasing y values to the bottom.
 
 _Note_: I use a bit of SVG trickery to size the vector graphic with the `viewBox` instead of `width` and `height` attributes. With the `viewBox` the width matches the number of data points so that you can give a width of 1 — minus the margin — on a single data point. The height matches the maximum value so that you can use the value directly to size the bars. The trickery will be less relevant once you introduce _scales_.
 
 ### Visualizations
 
-Draw a bar chart with rectangles side by side. Draw a scatter plot over two dimensions and with circles. If you bind the data to the size of the circle consider updating the the _area_, not the _radius_.
+Draw a bar chart with rectangles side by side. Draw a scatter plot over two dimensions and with circles. If you bind the data to the size of the circle consider updating the _area_, not the _radius_.
 
 ```js
 -.attr("r", (value) => value)
@@ -254,7 +254,7 @@ Scaling the radius tends to skew the perception of change, of the variation of v
 
 Functions which map from input domain to output range.
 
-The problem: you don't know the values ahead of time, but you want to have them position/sized/styled according to known value.
+The problem: you don't know the values ahead of time, but you want to have them positioned/sized/styled according to known values.
 
 D3's approach: set a domain and a range so that the unknown values fit in the known metrics.
 
@@ -274,7 +274,7 @@ const scale = d3.scaleLinear().domain([0, 10]).range([0, 100]);
 scale(8); // 80
 ```
 
-Use `d3.min`, `max` and `extent` to rapidly find the minimum, maximum, both valules from the input data. Pass an accessor function to consider a value in the input collection instead of the index — default.
+Use `d3.min`, `max` and `extent` to rapidly find the minimum, maximum, both values from the input data. Pass an accessor function to consider a value in the input collection instead of the index — default.
 
 ```js
 d3.max(dataset, ([x]) => x);
@@ -320,7 +320,7 @@ The input string illustrates the [format](https://github.com/d3/d3-time-format#l
 
 Axes are functions which do not return something, but generate visual elements. Think line, labels, ticks.
 
-Intented for SVG, since the generated elements are `<line>`, `<path>` and `<text>`.
+Intended for SVG, since the generated elements are `<line>`, `<path>` and `<text>`.
 
 ```pseudo
 d3
@@ -467,11 +467,11 @@ groups
   .delay((_, i) => i * 25);
 ```
 
-To accommodate for an unknown number of element set up a scale to avoid an excessively large delay.
+To accommodate for an unknown number of elements set up a scale to avoid an excessively large delay.
 
 ### Update scales
 
-The scales are set to map a domain to a range. In the moment the domain depends on the values of the dataset and these change you need to update the scale to match.
+The scales are set to map a domain to a range. The domain depends on the values of the dataset and these change you need to update the scale to match.
 
 ```js
 yScale.domain([0, d3.max(dataset)]).nice();
@@ -559,7 +559,7 @@ _Note_: in the demo I ultimately chose to keep the selections separate to manage
 
 ### Data joins with keys
 
-By default elements are bound of the basis of index.
+By default elements are bound on the basis of index.
 
 To have data bound to specific elements introduce a key, an identifier for each data point.
 
@@ -569,7 +569,7 @@ Refer to the key in the second argument of the data method, a callback function 
 .data(dataset, ({key}) => key)
 ```
 
-Once you remove a data point on the basis of key you remove the matching node, no longer the last one.
+Once you remove a data point on the basis of a key you remove the matching node, no longer the last one.
 
 ## Interactivity
 
@@ -634,7 +634,7 @@ If the datum are more complex than numbers you'd refer to the values in the sort
 
 ### Named transitions
 
-In the moment you transition the color of the rectangles on hover and transition their position when the button is clicked the change in the `x` coordinate might stop if you were to hover on the bar — only one transition at a time.
+In the moment you transition the color of the rectangles on hover _and_ transition their position when the button is clicked the change in the `x` coordinate might stop if you were to hover on the bar — only one transition at a time.
 
 Get around this by adding a name to the transition.
 
@@ -694,7 +694,7 @@ The following would draw the line, but would **not** bind the data to the elemen
 dataGroup.append("path").attr("d", line(dataset));
 ```
 
-If you were to inspect `d3.select('path')` you would not find the `__data__` property alongide the element's attributes.
+If you were to inspect `d3.select('path')` you would not find the `__data__` property alongside the element's attributes.
 
 ---
 
@@ -732,8 +732,6 @@ const area1 = d3
 ```
 
 ## Selections
-
-Mostly a theorical chapter to illustrate selections.
 
 ### Properties
 
@@ -927,7 +925,7 @@ The actual data is stored in the `d.value` field.
 .text(d => d.value)
 ```
 
-A note on the _order_ of the slices: the pie-d data computes the start and end angle so that the larger value starts and angle 0 and moves clockwise. It does **not** modify the order of the values in the array.
+A note on the _order_ of the slices: the pie-d data computes the start and end angle so that the larger value starts at angle 0 and moves clockwise. It does **not** modify the order of the values in the array.
 
 ```js
 console.log(dataset);
@@ -944,7 +942,7 @@ dataset.sort((a, b) => b - a);
 
 ### Colors
 
-D3 provides array of colors such as `d3.schemeCategory10`. Include the values in an ordinal scale to map index values to one of the colors from the array.
+D3 provides arrays of colors such as `d3.schemeCategory10`. Include the values in an ordinal scale to map index values to one of the colors from the array.
 
 ```js
 const scaleColor = d3.scaleOrdinal(d3.schemeCategory10);
@@ -985,7 +983,7 @@ D3 transforms the data to a two dimensional array, with the baseline and value a
 
 The challenge is mapping the values with the horizontal and vertical scale/dimension
 
-For the stacked columns bind the stacked data to group elements. The first set of arrays refer to the values for each category, so it is safe to set a fill color, shared by all visuals with same key.
+For the stacked columns bind the stacked data to group elements. The first set of arrays refer to the values for each category, so it is safe to set a fill color, shared by all visuals with the same key.
 
 ```js
 const dataGroups = dataGroup
@@ -996,7 +994,7 @@ const dataGroups = dataGroup
   .attr("fill", (_, i) => scaleColor(i));
 ```
 
-Bind a portion of the bound data to rectangle element.
+Bind a portion of the bound data to rectangle elements.
 
 ```js
 dataGroups
@@ -1008,7 +1006,7 @@ dataGroups
 
 In this instance `d` refers to the 2D array with the cumulative values (and the `data` property with the values for the keys).
 
-For the area the process is similar, but here you need to map the values through the area function `.x()` and `.y()` methods. In the demo I use the year value for the horizontal coordinate, the two cumulative values for the veertical coordinates, start and end.
+For the area the process is similar, but here you need to map the values through the area function `.x()` and `.y()` methods. In the demo I use the year value for the horizontal coordinate, the two cumulative values for the vertical coordinates, start and end.
 
 ```js
 const area = d3
@@ -1053,7 +1051,7 @@ const links = [
 ];
 ```
 
-The goal is to plot the nodes and connections, for instance with circle and lines. This is achieved in two steps:
+The goal is to plot the nodes and connections, for instance with circles and lines. This is achieved in two steps:
 
 1. draw the necessary visuals, in the demo circle, text and path elements
 
@@ -1092,7 +1090,7 @@ const force = d3
   );
 ```
 
-Once the simulation is set up the data is modified, `nodes` and `links`, so that the nodes and have a velocity (`vx` and `vy`) and a position (`x` and `y`).
+Once the simulation is set up the data is modified, `nodes` and `links`, so that the nodes have a velocity (`vx` and `vy`) and a position (`x` and `y`).
 
 ```js
 {
@@ -1144,7 +1142,7 @@ nodesGroups.style("cursor", "grab").call(drag);
 
 As repeated later in the geomapping section, `call` executes the input function — in this instance `drag` — passing the current selection — the group elements storing the nodes — as argument.
 
-Importantly, call the drag function **on the same** element which you update following the `tick` event — `nodesGroups`. In a first version I called the function on the circle element which I superimpose on the node.
+Importantly, call the drag function **on the same** element which you update following the `tick` event — `nodesGroups`. In a previous version I called the function on the circle element which I superimposed on the node.
 
 ```js
 nodesGroups.append("circle").attr("r", 20).attr("opacity", "0").call(drag);
@@ -1190,9 +1188,9 @@ The functions each receive the event as the first argument, the bound datum as t
 
 About `alphaTarget`: D3 runs the simulation on the basis of an alpha value. This value decreases over time toward `alphaTarget` and stops when the value is smaller than or equal to `alphaMin`. Therefore, if `alphaTarget` is greater than `alphaMin` the simulation continues indefinitely.
 
-When the drag action start you increase `alphaTarget` _and_ restart the animation so that the nodes and edges can move. When the action ends you set it back to 0 to eventually end the simulation.
+When the drag action starts you increase `alphaTarget` _and_ restart the animation so that the nodes and edges can move. When the action ends you set it back to 0 to eventually end the simulation.
 
-## Geomapping
+## Geo Mapping
 
 Use GeoJSON, a specific format of JSON syntax which summarizes geographical data — think map coordinates.
 
@@ -1258,7 +1256,7 @@ Given a dataset describing large cities as well as the population and coordinate
 const [x, y] = projection([d.lon, d.lat]);
 ```
 
-The projection function receives an array with the longitude and latitude. Based on the two value the function returns the x and y coordinates.
+The projection function receives an array with the longitude and latitude. Based on the two values the function returns the x and y coordinates.
 
 ### Pan
 
@@ -1268,7 +1266,7 @@ One way to move the map is to translate the projection.
 projection.translate([x, y]);
 ```
 
-Once you have ou update the projection update the visuals and the attributes which rely on said function, for instance the countries.
+Once you update the projection update the visuals and the attributes which rely on said function, for instance the countries.
 
 ```js
 dataGroup.selectAll("path").transition().attr("d", path);
@@ -1276,7 +1274,7 @@ dataGroup.selectAll("path").transition().attr("d", path);
 
 ### Drag
 
-Instead of translating the map by fixed measures allow to drag with the `d3.drag()` function.
+Instead of translating the map by fixed measures allow to drag the map with the `d3.drag()` function.
 
 Superimpose a rectangle to track mouse interaction anywhere on the vector.
 
@@ -1333,7 +1331,7 @@ const zoom = d3.zoom().on("zoom", function (e) {
 });
 ```
 
-Unlike the dragging feature, d3.zoom stores the zoom value _in_ the node. Consider how their might be different sections of the visualization at different level of depth.
+Unlike the dragging feature, d3.zoom stores the zoom value _in_ the node. Consider how there might be different sections of the visualization at different levels of depth.
 
 Retrieve the zoom value of a node with `d3.zoomTransform()` passing the node as argument (the property itself is stored in the `__zoom` field).
 
@@ -1355,7 +1353,7 @@ Update the scale similarly to how you update the translate portion of the same p
 projection.translate([x, y]).scale(k * initialScale);
 ```
 
-A note on the translate values. The projection has initial values for the `x` and `y` coordinates, meaning the map would immediately jump to the top left corner as the projection contemplates `e.transform.x` and `e.transform.y` as starting from 0. To compensate for this, and on the basis of the desired, initial translation, invoke an additional function to update the values.
+A note on the translated values. The projection has initial values for the `x` and `y` coordinates, meaning the map would immediately jump to the top left corner as the projection contemplates `e.transform.x` and `e.transform.y` as starting from 0. To compensate for this, and on the basis of the desired, initial translation, invoke an additional function to update the values.
 
 ```js
 const [initialX, initialY] = projection.translate();
@@ -1405,3 +1403,19 @@ const zoom = d3
   ])
   .on("zoom", function (e) {});
 ```
+
+### Geographical data
+
+General information on creating maps:
+
+- you need shapefiles with coordinates data; consider [Natural Earth](https://www.naturalearthdata.com/) or more specific sources like the [US states census](https://www.census.gov/geographies/mapping-files.html)
+
+- pick appropriate resolution
+
+- simplify shapes; consider tools such as [mapshaper](https://mapshaper.org/)
+
+- convert shapefiles to GeoJSON or [TopoJSON](https://github.com/topojson/topojson)
+
+  TopoJSON stores topologies, not geometries, and makes for a more efficient format. If you do choose the format know that ultimately you need the `topojson` library to turn the syntax into the GeoJSON values which D3 understands.
+
+- choose a [projection](https://github.com/d3/d3-geo#projections); different maps require different projects. geoAlbersUS might be perfect to highlight the US states, but geoMercator might be a better fit for the world's countries
