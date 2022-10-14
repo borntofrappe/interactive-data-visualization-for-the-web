@@ -249,13 +249,10 @@ const vizForce = () => {
 
   const dataGroup = svg.append("g");
 
-  const edgesGroup = dataGroup.append("g");
-  const nodesGroups = dataGroup
-    .append("g")
-    .selectAll("g")
-    .data(nodes)
-    .enter()
-    .append("g");
+  const edgesGroup = dataGroup.append("g").style("pointer-events", "none");
+  const nodesGroup = dataGroup.append("g");
+
+  const nodesGroups = nodesGroup.selectAll("g").data(nodes).enter().append("g");
 
   nodesGroups
     .append("circle")
@@ -270,6 +267,30 @@ const vizForce = () => {
     .attr("text-anchor", "middle")
     .attr("dominant-baseline", "central")
     .attr("font-size", "14");
+
+  const drag = d3
+    .drag()
+    .on("start", function (e, d) {
+      if (e.active === 0) force.alphaTarget(0.1).restart();
+
+      d3.select(this).style("cursor", "grabbing");
+    })
+    .on("drag", (e, d) => {
+      const { x, y } = e;
+      d.fx = x;
+      d.fy = y;
+    })
+    .on("end", function (e, d) {
+      if (e.active === 0) force.alphaTarget(0);
+
+      d3.select(this).style("cursor", "grab");
+
+      d.fx = null;
+      d.fy = null;
+    });
+
+  nodesGroups.append("circle").attr("r", 20).attr("opacity", "0");
+  nodesGroups.style("cursor", "grab").call(drag);
 
   const edges = edgesGroup
     .selectAll("path")

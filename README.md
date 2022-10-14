@@ -1136,6 +1136,62 @@ force.on("tick", () => {
 });
 ```
 
+Once the simulation has run its course, the nodes and edges stop moving. It is however possible to resume the simulation on interaction such as when dragging nodes.
+
+```js
+nodesGroups.style("cursor", "grab").call(drag);
+```
+
+As repeated later in the geomapping section, `call` executes the input function — in this instance `drag` — passing the current selection — the group elements storing the nodes — as argument.
+
+Importantly, call the drag function **on the same** element which you update following the `tick` event — `nodesGroups`. In a first version I called the function on the circle element which I superimpose on the node.
+
+```js
+nodesGroups.append("circle").attr("r", 20).attr("opacity", "0").call(drag);
+```
+
+But this solution results in a stutter (D3 would update the position of the circle, then the position of the wrapping group element).
+
+For the dragging feature use `d3.drag` and listen to specific events, such as `start`, `end`, `drag`.
+
+```js
+const drag = d3
+  .drag()
+  .on("start", () => {})
+  .on("end", () => {})
+  .on("drag", () => {});
+```
+
+The functions each receive the event as the first argument, the bound datum as the second argument:
+
+- when the drag action starts restart the animation and set an `alphaTarget` greater than 0 (see below)
+
+  ```js
+  if (e.active === 0) force.alphaTarget(0.1).restart();
+  ```
+
+  `e.active` is 0 when the drag operation has started yet, 1 when it is indeed ongoing
+
+- when the drag action ends set the `alphaTarget` to 0
+
+  ```js
+  if (e.active === 0) force.alphaTarget(0);
+  ```
+
+- when the drag action continues update the node in its `fx` and `fy` field — the two describe a force applied on the individual element
+
+  ```js
+  .on("drag", (e, d) => {
+    const { x, y } = e;
+    d.fx = x;
+    d.fy = y;
+  })
+  ```
+
+About `alphaTarget`: D3 runs the simulation on the basis of an alpha value. This value decreases over time toward `alphaTarget` and stops when the value is smaller than or equal to `alphaMin`. Therefore, if `alphaTarget` is greater than `alphaMin` the simulation continues indefinitely.
+
+When the drag action start you increase `alphaTarget` _and_ restart the animation so that the nodes and edges can move. When the action ends you set it back to 0 to eventually end the simulation.
+
 ## Geomapping
 
 Use GeoJSON, a specific format of JSON syntax which summarizes geographical data — think map coordinates.
