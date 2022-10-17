@@ -1419,3 +1419,9 @@ General information on creating maps:
   TopoJSON stores topologies, not geometries, and makes for a more efficient format. If you do choose the format know that ultimately you need the `topojson` library to turn the syntax into the GeoJSON values which D3 understands.
 
 - choose a [projection](https://github.com/d3/d3-geo#projections); different maps require different projects. geoAlbersUS might be perfect to highlight the US states, but geoMercator might be a better fit for the world's countries
+
+## Project Walk-through
+
+The demo is more inspired by the last chapter more than a direct copy. Instead of looking at car sales I focus on baby names popular in France between the year 2012 and 2021. Instead of a chart analysing the number of car sales by car type and then car model I focus on names by letter and then names in each individual letter. The goal is to preserve the chapter's intent of a stacked, interactangle area chart.
+
+For the dataset refer to the French [national institute of statistics and economic studies](https://www.insee.fr/fr/statistiques/3532172).
