@@ -1422,6 +1422,12 @@ General information on creating maps:
 
 ## Project Walk-through
 
-The demo is more inspired by the last chapter more than a direct copy. Instead of looking at car sales I focus on baby names popular in France between the year 2012 and 2021. Instead of a chart analysing the number of car sales by car type and then car model I focus on names by letter and then names in each individual letter. The goal is to preserve the chapter's intent of a stacked, interactangle area chart.
+The last chapter focuses on an interactive, stacked area chart. The end result is a visualization where you are presented with electric car vehicle by type. Click on one of the few types to have the other collapse, and the chosen type broken down in car model.
 
-For the dataset refer to the French [national institute of statistics and economic studies](https://www.insee.fr/fr/statistiques/3532172).
+Instead of creating the same plot, I prefer to practice with a different dataset and overall structure.
+
+For the dataset `dataset.csv` keeps a record of the most 100 frequent names for French babies, males, as documented by the [national institute of statistics and economic studies](https://www.insee.fr/fr/statistiques/3532172)(INSEE).
+
+In the script, `vizNames` immediately plots a stacked area chart looking at _all_ possible names in the chosen year range (2012 to 2021).
+
+The goal is to motivate the second chart, the interactive stacked area chart, highlighting the shortcomings of the information-heavy visualization.
