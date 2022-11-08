@@ -266,7 +266,7 @@ const highlightNames = () => {
 
   const groupLetters = groupData.append("g");
   const groupOverlay = groupData.append("g");
-  const groupNames = groupData.append("g");
+  const groupLetter = groupData.append("g");
 
   groupLetters
     .selectAll("path")
@@ -305,7 +305,11 @@ const highlightNames = () => {
     .on("pointerenter", function (e, { key }) {
       d3.select(this).style("filter", "brightness(1.1)");
 
-      tooltip.style("visibility", "visible").style("opacity", "1");
+      tooltip
+        .style("visibility", "visible")
+        .style("opacity", "1")
+        .style("left", `${e.layerX}px`)
+        .style("top", `${e.layerY}px`);
 
       tooltip
         .append("p")
@@ -345,7 +349,7 @@ const highlightNames = () => {
       ])
       .nice();
 
-    const transition = d3.transition().duration(750).ease(d3.easeQuadIn);
+    const transition = d3.transition().duration(750).ease(d3.easeQuadInOut);
 
     groupAxis.select(".y-axis").transition(transition).call(axisY);
     groupLetters
@@ -361,25 +365,127 @@ const highlightNames = () => {
       .remove();
 
     groupOverlay.style("pointer-events", "initial");
+
+    const namesLetter = names.filter((name) => name[0] === letter);
+    const dataStackLetter = [...d3.group(dataset, (d) => d.year)].reduce(
+      (acc, [year, data]) => {
+        return [
+          ...acc,
+          {
+            year: timeParse(year),
+            ...data.reduce((a, { name, number }) => {
+              if (name[0] === letter) {
+                a[name] = number;
+              }
+              return a;
+            }, {}),
+          },
+        ];
+      },
+      []
+    );
+
+    const dataStackedEmpty = d3
+      .stack()
+      .keys(namesLetter)
+      .value(() => 0)(dataStackLetter);
+
+    groupLetter
+      .selectAll("path")
+      .data(dataStackedEmpty)
+      .enter()
+      .append("path")
+      .attr("fill", (_, i) => scaleColor(i % dataStackedEmpty.length))
+      .attr("d", area);
+
     transition.on("end", () => {
-      groupOverlay.on("click", function (e, d) {
-        groupOverlay.style("pointer-events", "none");
+      const transition = d3
+        .transition()
+        .duration(750)
+        .delay(50)
+        .ease(d3.easeQuadInOut);
 
-        scaleY
-          .domain([
-            0,
-            d3.max(dataStacked[dataStacked.length - 1], ([, m]) => m),
-          ])
-          .nice();
+      const dataStackedLetter = d3
+        .stack()
+        .keys(namesLetter)
+        .value((d, key) => d[key] || 0)(dataStackLetter);
 
-        const transition = d3.transition().duration(750).ease(d3.easeQuadOut);
+      groupLetter
+        .selectAll("path")
+        .data(dataStackedLetter)
+        .transition(transition)
+        .attr("d", area);
 
-        groupAxis.select(".y-axis").transition(transition).call(axisY);
-        groupLetters
+      transition.on("end", () => {
+        groupLetter
           .selectAll("path")
-          .data(dataStacked)
-          .transition(transition)
-          .attr("d", area);
+          .on("pointerenter", function (e, { key }) {
+            d3.select(this).style("filter", "brightness(1.1)");
+
+            tooltip
+              .style("visibility", "visible")
+              .style("opacity", "1")
+              .style("left", `${e.layerX}px`)
+              .style("top", `${e.layerY}px`);
+
+            tooltip
+              .append("p")
+              .html(
+                `<span class="visually-hidden">Letter: </span><strong>${key}</strong>`
+              );
+          })
+          .on("pointermove", (e) => {
+            tooltip
+              .style("left", `${e.layerX}px`)
+              .style("top", `${e.layerY}px`);
+          })
+          .on("pointerleave", function () {
+            d3.select(this).style("filter", "brightness(1)");
+
+            tooltip
+              .style("visibility", "hidden")
+              .style("opacity", "0")
+              .selectAll("*")
+              .remove();
+          });
+
+        groupOverlay.on(
+          "click",
+          function (e, d) {
+            scaleY
+              .domain([
+                0,
+                d3.max(dataStacked[dataStacked.length - 1], ([, m]) => m),
+              ])
+              .nice();
+
+            const transition = d3
+              .transition()
+              .duration(750)
+              .ease(d3.easeQuadInOut);
+
+            groupAxis.select(".y-axis").transition(transition).call(axisY);
+            groupLetters
+              .selectAll("path")
+              .data(dataStacked)
+              .transition(transition)
+              .attr("d", area);
+
+            groupLetter
+              .selectAll("path")
+              .data(dataStackedEmpty)
+              .transition(transition)
+              .attr("d", area)
+              .remove();
+
+            transition.on("end", () => {
+              groupOverlay.style("pointer-events", "none");
+            });
+          },
+          {
+            once: true,
+          }
+        );
       });
     });
   });
