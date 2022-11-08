@@ -322,7 +322,11 @@ const highlightNames = () => {
     const dataStackedKey = d3
       .stack()
       .keys(letters)
-      .value((d, key) => (key === letter ? d[key] : 0))(dataStack);
+      .value((d, key) => {
+        if (key !== letter) return 0;
+
+        return d[key] || 0;
+      })(dataStack);
 
     scaleY
       .domain([
