@@ -6,15 +6,6 @@ const timeFormat = d3.timeFormat("%Y");
 const numberFormat = d3.format(",");
 
 const visualizeNames = () => {
-  const width = 1000;
-  const height = 500;
-  const margin = {
-    top: 10,
-    right: 20,
-    bottom: 30,
-    left: 70,
-  };
-
   const names = dataset
     .map(({ name }) => name)
     .reduce(
@@ -23,14 +14,10 @@ const visualizeNames = () => {
     );
 
   const dataStack = [...d3.group(dataset, (d) => d.year)].map(
-    ([year, values]) => {
-      return Object.assign(
-        {
-          year: timeParse(year),
-        },
-        Object.fromEntries(values.map(({ name, number }) => [name, number]))
-      );
-    }
+    ([year, values]) => ({
+      year: timeParse(year),
+      ...Object.fromEntries(values.map(({ name, number }) => [name, number])),
+    })
   );
 
   const stack = d3
@@ -39,6 +26,15 @@ const visualizeNames = () => {
     .value((d, key) => d[key] || 0);
 
   const dataStacked = stack(dataStack);
+
+  const width = 1000;
+  const height = 500;
+  const margin = {
+    top: 10,
+    right: 20,
+    bottom: 30,
+    left: 70,
+  };
 
   const scaleX = d3
     .scaleTime()
@@ -160,28 +156,44 @@ const visualizeNames = () => {
 };
 
 const highlightNames = () => {
-  const names = [];
-  const letters = [];
-  const data = {};
-  const dataNames = {};
+  const names = dataset
+    .map(({ name }) => name)
+    .reduce(
+      (acc, curr) => (acc.includes(curr) ? [...acc] : [...acc, curr]),
+      []
+    );
 
-  for (const { year, name, number } of dataset) {
-    if (!names.includes(name)) names.push(name);
+  const letters = names
+    .map((name) => name[0])
+    .reduce(
+      (acc, curr) => (acc.includes(curr) ? [...acc] : [...acc, curr]),
+      []
+    );
 
-    const [letter] = name;
-    if (!letters.includes(letter)) letters.push(letter);
+  const dataStack = [...d3.group(dataset, (d) => d.year)].reduce(
+    (acc, [year, data]) => {
+      return [
+        ...acc,
+        {
+          year: timeParse(year),
+          ...data.reduce((a, { name, number }) => {
+            const [letter] = name;
+            a[letter] = a[letter] ? a[letter] + number : number;
 
-    if (data[year]) {
-      data[year][letter] = data[year][letter]
-        ? data[year][letter] + number
-        : number;
+            return a;
+          }, {}),
+        },
+      ];
+    },
+    []
+  );
 
-      dataNames[year].values.push([name, number]);
-    } else {
-      data[year] = { year: timeParse(year), [letter]: number };
-      dataNames[year] = { year: timeParse(year), values: [[name, number]] };
-    }
-  }
+  const stack = d3
+    .stack()
+    .keys(letters)
+    .value((d, key) => d[key] || 0);
+
+  const dataStacked = stack(dataStack);
 
   const width = 1000;
   const height = 500;
@@ -191,16 +203,6 @@ const highlightNames = () => {
     bottom: 30,
     left: 70,
   };
-
-  const dataStack = Object.values(data);
-  console.log(dataStack);
-
-  const stack = d3
-    .stack()
-    .keys(letters)
-    .value((d, key) => d[key] || 0);
-
-  const dataStacked = stack(dataStack);
 
   const scaleX = d3
     .scaleTime()
@@ -358,60 +360,27 @@ const highlightNames = () => {
       .selectAll("*")
       .remove();
 
+    groupOverlay.style("pointer-events", "initial");
     transition.on("end", () => {
-      const namesLetter = names.filter((name) => name[0] === letter);
-      console.log(names);
+      groupOverlay.on("click", function (e, d) {
+        groupOverlay.style("pointer-events", "none");
 
-      const dataLetter = Object.fromEntries(
-        Object.entries(dataNames).map(([year, data]) => [
-          year,
-          {
-            year: timeParse(year),
-            ...Object.fromEntries(
-              data.values
-                .filter(([name]) => name[0] === letter)
-                .map(([name, number]) => [name, number])
-            ),
-          },
-        ])
-      );
+        scaleY
+          .domain([
+            0,
+            d3.max(dataStacked[dataStacked.length - 1], ([, m]) => m),
+          ])
+          .nice();
 
-      console.log(dataLetter);
-      const dataStackedLetter = d3
-        .stack()
-        .keys(namesLetter)
-        .value((d, key) => d[key] || 0)(dataLetter);
+        const transition = d3.transition().duration(750).ease(d3.easeQuadOut);
 
-      console.log(dataStackedLetter);
-
-      // groupNames
-      //   .selectAll("path")
-      //   .data(dataStackedLetter)
-      //   .enter()
-      //   .append("path")
-      //   .attr("d", area);
-
-      groupOverlay
-        .style("pointer-events", "initial")
-        .on("click", function (e, d) {
-          groupOverlay.style("pointer-events", "none");
-
-          scaleY
-            .domain([
-              0,
-              d3.max(dataStacked[dataStacked.length - 1], ([, m]) => m),
-            ])
-            .nice();
-
-          const transition = d3.transition().duration(750).ease(d3.easeQuadOut);
-
-          groupAxis.select(".y-axis").transition(transition).call(axisY);
-          groupLetters
-            .selectAll("path")
-            .data(dataStacked)
-            .transition(transition)
-            .attr("d", area);
-        });
+        groupAxis.select(".y-axis").transition(transition).call(axisY);
+        groupLetters
+          .selectAll("path")
+          .data(dataStacked)
+          .transition(transition)
+          .attr("d", area);
+      });
     });
   });
 
@@ -432,5 +401,5 @@ const highlightNames = () => {
   header.append("h1").text("Les noms de l'avenir");
 
   visualizeNames();
-  // highlightNames();
+  highlightNames();
 })();
