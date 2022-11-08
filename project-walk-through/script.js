@@ -117,6 +117,43 @@ const visualizeNames = () => {
         numberEnd
       )}</strong> in <strong>${yearEnd}</strong>.`
     );
+
+  article.style("position", "relative");
+
+  const tooltip = article
+    .append("div")
+    .attr("class", "tooltip")
+    .style("position", "absolute")
+    .style("pointer-events", "none")
+    .style("visibility", "hidden")
+    .style("opacity", "0");
+
+  dataGroup
+    .selectAll("path")
+    .on("pointerenter", function (e, { key }) {
+      d3.select(this).style("filter", "brightness(1.1)");
+
+      tooltip.style("visibility", "visible").style("opacity", "1");
+
+      tooltip
+        .append("p")
+        .html(
+          `<span class="visually-hidden">Name: </span><strong>${key}</strong>`
+        );
+    })
+    .on("pointermove", (e) => {
+      tooltip.style("left", `${e.layerX}px`).style("top", `${e.layerY}px`);
+    })
+    .on("pointerleave", function () {
+      console.log("!!");
+      d3.select(this).style("filter", "brightness(1)");
+
+      tooltip
+        .style("visibility", "hidden")
+        .style("opacity", "0")
+        .selectAll("*")
+        .remove();
+    });
 };
 
 const highlightNames = () => {
@@ -196,10 +233,14 @@ const highlightNames = () => {
     .append("svg")
     .attr(
       "viewBox",
-      `${-margin.left} ${-margin.top} ${width + (margin.left + margin.right)} ${
+      `0 0 ${width + (margin.left + margin.right)} ${
         height + (margin.top + margin.bottom)
       }`
     );
+
+  const group = svg
+    .append("g")
+    .attr("transform", `translate(${margin.left} ${margin.top})`);
 
   const defs = svg.append("defs");
 
@@ -209,8 +250,8 @@ const highlightNames = () => {
 
   clipPath.append("rect").attr("width", width).attr("height", height);
 
-  const dataGroup = svg.append("g").attr("id", "clip-path-highlight-names");
-  const axisGroup = svg.append("g");
+  const dataGroup = group.append("g").attr("id", "clip-path-highlight-names");
+  const axisGroup = group.append("g");
 
   dataGroup
     .selectAll("path")
@@ -222,6 +263,49 @@ const highlightNames = () => {
 
   axisGroup.append("g").attr("transform", `translate(0 ${height})`).call(axisX);
   axisGroup.append("g").call(axisY);
+
+  article.style("position", "relative");
+
+  const tooltip = article
+    .append("div")
+    .attr("class", "tooltip")
+    .style("position", "absolute")
+    .style("pointer-events", "none")
+    .style("visibility", "hidden")
+    .style("opacity", "0");
+
+  dataGroup
+    .selectAll("path")
+    .on("pointerenter", function (e, { key }) {
+      d3.select(this).style("filter", "brightness(1.1)");
+
+      tooltip.style("visibility", "visible").style("opacity", "1");
+
+      tooltip
+        .append("p")
+        .html(
+          `<span class="visually-hidden">Letter: </span><strong>${key}</strong>`
+        );
+    })
+    .on("pointermove", (e) => {
+      tooltip.style("left", `${e.layerX}px`).style("top", `${e.layerY}px`);
+    })
+    .on("pointerleave", function () {
+      console.log("!!");
+      d3.select(this).style("filter", "brightness(1)");
+
+      tooltip
+        .style("visibility", "hidden")
+        .style("opacity", "0")
+        .selectAll("*")
+        .remove();
+    });
+
+  // article
+  //   .append("p")
+  //   .html(
+  //     "Click on one of the areas to to highlight <em>all</em> the names starting with the corresponding letter."
+  //   );
 };
 
 (async () => {
@@ -230,8 +314,6 @@ const highlightNames = () => {
     name,
     number: parseInt(number, 10),
   }));
-
-  console.log(dataset);
 
   const div = d3.select("body").append("div").attr("id", "root");
   const header = div.append("header");

@@ -5,10 +5,13 @@
 }
 
 body {
-  font-family: sans-serif;
+  color: hsl(345, 5%, 15%);
+  background: hsl(38, 100%, 95%);
+  font-family: -apple-system, BlinkMacSystemFont, avenir next, avenir, segoe ui,
+    helvetica neue, helvetica, Ubuntu, roboto, noto, arial, sans-serif;
 }
 
-div {
+#root {
   max-width: 52rem;
   width: 95vw;
   margin-left: auto;
@@ -29,10 +32,38 @@ svg text {
   font-size: 1rem;
 }
 
-div > * + * {
+#root > * + * {
   margin-top: 1em;
 }
 
 article > * + * {
   margin-top: 0.75em;
+}
+
+article {
+  position: relative;
+}
+
+article .tooltip {
+  position: absolute;
+  pointer-events: none;
+  transform: translate(-50%, -100%);
+}
+
+.tooltip {
+  width: max-content;
+  color: hsl(38, 100%, 95%);
+  background: hsl(345, 5%, 15%);
+  padding: 0.35rem 0.5rem;
+  font-size: 0.9rem;
+}
+
+.visually-hidden:not(:focus):not(:active) {
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  height: 1px;
+  width: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
 }
