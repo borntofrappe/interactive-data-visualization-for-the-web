@@ -1,9 +1,16 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
 body {
   font-family: sans-serif;
 }
 
 div {
   max-width: 52rem;
+  width: 95vw;
   margin-left: auto;
   margin-right: auto;
 }
@@ -15,9 +22,17 @@ h2 {
 
 p {
   max-width: 75ch;
-  line-height: 1.5;
+  line-height: 1.35;
 }
 
 svg text {
   font-size: 1rem;
+}
+
+div > * + * {
+  margin-top: 1em;
+}
+
+article > * + * {
+  margin-top: 0.75em;
 }

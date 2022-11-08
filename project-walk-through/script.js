@@ -5,7 +5,7 @@ const timeParse = d3.timeParse("%Y");
 const timeFormat = d3.timeFormat("%Y");
 const numberFormat = d3.format(",");
 
-const vizNames = () => {
+const visualizeNames = () => {
   const names = [];
   const data = {};
 
@@ -20,12 +20,12 @@ const vizNames = () => {
   }
 
   const width = 1000;
-  const height = 400;
+  const height = 500;
   const margin = {
-    top: 20,
+    top: 10,
     right: 20,
     bottom: 30,
-    left: 80,
+    left: 70,
   };
 
   const dataStack = Object.values(data);
@@ -37,12 +37,12 @@ const vizNames = () => {
 
   const dataStacked = stack(dataStack);
 
-  const xScale = d3
+  const scaleX = d3
     .scaleTime()
     .domain(d3.extent(dataStack, ({ year }) => year))
     .range([0, width]);
 
-  const yScale = d3
+  const scaleY = d3
     .scaleLinear()
     .domain([0, d3.max(dataStacked[dataStacked.length - 1], ([, m]) => m)])
     .range([height, 0])
@@ -52,14 +52,19 @@ const vizNames = () => {
 
   const area = d3
     .area()
-    .x(({ data }) => xScale(data.year))
-    .y0(([y0]) => yScale(y0))
-    .y1(([, y1]) => yScale(y1));
+    .x(({ data }) => scaleX(data.year))
+    .y0(([y0]) => scaleY(y0))
+    .y1(([, y1]) => scaleY(y1));
 
-  const xAxis = d3.axisBottom(xScale).tickSize(0).tickPadding(16);
-  const yAxis = d3.axisLeft(yScale).tickSize(0).tickPadding(16).ticks(5);
+  const axisX = d3.axisBottom(scaleX).tickSize(0).tickPadding(12);
+  const axisY = d3
+    .axisLeft(scaleY)
+    .tickSize(0)
+    .tickPadding(10)
+    .ticks(5)
+    .tickFormat((d) => (d ? numberFormat(d) : ""));
 
-  const article = d3.select("#viz").append("article");
+  const article = d3.select("#root").append("article");
   article.append("h2").text("Most frequent names");
   article
     .append("p")
@@ -78,11 +83,13 @@ const vizNames = () => {
 
   const defs = svg.append("defs");
 
-  const clipPath = defs.append("clipPath").attr("id", "clip-path-viz-names");
+  const clipPath = defs
+    .append("clipPath")
+    .attr("id", "clip-path-visualize-names");
 
   clipPath.append("rect").attr("width", width).attr("height", height);
 
-  const dataGroup = svg.append("g").attr("id", "clip-path-viz-names");
+  const dataGroup = svg.append("g").attr("id", "clip-path-visualize-names");
   const axisGroup = svg.append("g");
 
   dataGroup
@@ -93,10 +100,10 @@ const vizNames = () => {
     .attr("fill", (_, i) => scaleColor(i % dataStacked.length))
     .attr("d", area);
 
-  axisGroup.append("g").attr("transform", `translate(0 ${height})`).call(xAxis);
-  axisGroup.append("g").call(yAxis);
+  axisGroup.append("g").attr("transform", `translate(0 ${height})`).call(axisX);
+  axisGroup.append("g").call(axisY);
 
-  const [yearStart, yearEnd] = xScale.domain().map((d) => timeFormat(d));
+  const [yearStart, yearEnd] = scaleX.domain().map((d) => timeFormat(d));
   const dataLast = dataStacked[dataStacked.length - 1];
   const [, numberStart] = dataLast[0];
   const [, numberEnd] = dataLast[dataLast.length - 1];
@@ -106,13 +113,13 @@ const vizNames = () => {
     .html(
       `From <strong>${numberFormat(
         numberStart
-      )}</strong> in <strong>${yearStart}</strong> the number of most frequent names falls to <strong>${numberFormat(
+      )}</strong> in <strong>${yearStart}</strong> the 100 most frequent names fall to <strong>${numberFormat(
         numberEnd
       )}</strong> in <strong>${yearEnd}</strong>.`
     );
 };
 
-const vizLetters = () => {
+const highlightNames = () => {
   const names = [];
   const letters = [];
   const data = {};
@@ -133,12 +140,12 @@ const vizLetters = () => {
   }
 
   const width = 1000;
-  const height = 400;
+  const height = 500;
   const margin = {
-    top: 20,
+    top: 10,
     right: 20,
     bottom: 30,
-    left: 80,
+    left: 70,
   };
 
   const dataStack = Object.values(data);
@@ -150,12 +157,12 @@ const vizLetters = () => {
 
   const dataStacked = stack(dataStack);
 
-  const xScale = d3
+  const scaleX = d3
     .scaleTime()
     .domain(d3.extent(dataStack, ({ year }) => year))
     .range([0, width]);
 
-  const yScale = d3
+  const scaleY = d3
     .scaleLinear()
     .domain([0, d3.max(dataStacked[dataStacked.length - 1], ([, m]) => m)])
     .range([height, 0])
@@ -165,14 +172,19 @@ const vizLetters = () => {
 
   const area = d3
     .area()
-    .x(({ data }) => xScale(data.year))
-    .y0(([y0]) => yScale(y0))
-    .y1(([, y1]) => yScale(y1));
+    .x(({ data }) => scaleX(data.year))
+    .y0(([y0]) => scaleY(y0))
+    .y1(([, y1]) => scaleY(y1));
 
-  const xAxis = d3.axisBottom(xScale).tickSize(0).tickPadding(16);
-  const yAxis = d3.axisLeft(yScale).tickSize(0).tickPadding(16).ticks(5);
+  const axisX = d3.axisBottom(scaleX).tickSize(0).tickPadding(12);
+  const axisY = d3
+    .axisLeft(scaleY)
+    .tickSize(0)
+    .tickPadding(10)
+    .ticks(5)
+    .tickFormat((d) => (d ? numberFormat(d) : ""));
 
-  const article = d3.select("#viz").append("article");
+  const article = d3.select("#root").append("article");
   article.append("h2").text("Most frequent letters");
   article
     .append("p")
@@ -191,11 +203,13 @@ const vizLetters = () => {
 
   const defs = svg.append("defs");
 
-  const clipPath = defs.append("clipPath").attr("id", "clip-path-viz-letters");
+  const clipPath = defs
+    .append("clipPath")
+    .attr("id", "clip-path-highlight-names");
 
   clipPath.append("rect").attr("width", width).attr("height", height);
 
-  const dataGroup = svg.append("g").attr("id", "clip-path-viz-letters");
+  const dataGroup = svg.append("g").attr("id", "clip-path-highlight-names");
   const axisGroup = svg.append("g");
 
   dataGroup
@@ -206,28 +220,23 @@ const vizLetters = () => {
     .attr("fill", (_, i) => scaleColor(i % dataStacked.length))
     .attr("d", area);
 
-  axisGroup.append("g").attr("transform", `translate(0 ${height})`).call(xAxis);
-  axisGroup.append("g").call(yAxis);
-
-  const [yearStart, yearEnd] = xScale.domain().map((d) => timeFormat(d));
-  const dataLast = dataStacked[dataStacked.length - 1];
-  const [, numberStart] = dataLast[0];
-  const [, numberEnd] = dataLast[dataLast.length - 1];
+  axisGroup.append("g").attr("transform", `translate(0 ${height})`).call(axisX);
+  axisGroup.append("g").call(axisY);
 };
 
-const viz = async () => {
-  dataset = await d3.csv("dataset.csv", ({ Year, Name, Number }) => ({
-    year: Year,
-    name: Name,
-    number: parseInt(Number, 10),
+(async () => {
+  dataset = await d3.csv("dataset.csv", ({ year, name, number }) => ({
+    year,
+    name,
+    number: parseInt(number, 10),
   }));
 
-  const div = d3.select("body").append("div").attr("id", "viz");
+  console.log(dataset);
+
+  const div = d3.select("body").append("div").attr("id", "root");
   const header = div.append("header");
   header.append("h1").text("Les noms de l'avenir");
 
-  vizNames();
-  vizLetters();
-};
-
-viz();
+  visualizeNames();
+  highlightNames();
+})();

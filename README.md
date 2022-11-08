@@ -1428,6 +1428,7 @@ Instead of creating the same plot, I prefer to practice with a different dataset
 
 For the dataset `dataset.csv` keeps a record of the most 100 frequent names for French babies, males, as documented by the [national institute of statistics and economic studies](https://www.insee.fr/fr/statistiques/3532172)(INSEE).
 
-In the script, `vizNames` immediately plots a stacked area chart looking at _all_ possible names in the chosen year range (2012 to 2021).
+In the script, `visualizeNames` immediately plots a stacked area chart looking at _all_ possible names in the chosen year range (2012 to 2021).
 
-The goal is to motivate the second chart, the interactive stacked area chart, highlighting the shortcomings of the information-heavy visualization.
+The goal is to motivate the second visualization, stressing the shortcomings of the first one. `highlightNames` plots a stacked
+area chart consideering the first letter. Click on one of the areas to have all collapse and highlight the names with the specific letter.
