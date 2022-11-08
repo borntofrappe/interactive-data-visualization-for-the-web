@@ -54,7 +54,8 @@ const visualizeNames = () => {
     .area()
     .x(({ data }) => scaleX(data.year))
     .y0(([y0]) => scaleY(y0))
-    .y1(([, y1]) => scaleY(y1));
+    .y1(([, y1]) => scaleY(y1))
+    .curve(d3.curveCatmullRom);
 
   const axisX = d3.axisBottom(scaleX).tickSize(0).tickPadding(12);
   const axisY = d3
@@ -89,10 +90,10 @@ const visualizeNames = () => {
 
   clipPath.append("rect").attr("width", width).attr("height", height);
 
-  const dataGroup = svg.append("g").attr("id", "clip-path-visualize-names");
-  const axisGroup = svg.append("g");
+  const groupData = svg.append("g").attr("id", "clip-path-visualize-names");
+  const groupAxis = svg.append("g");
 
-  dataGroup
+  groupData
     .selectAll("path")
     .data(dataStacked)
     .enter()
@@ -100,8 +101,8 @@ const visualizeNames = () => {
     .attr("fill", (_, i) => scaleColor(i % dataStacked.length))
     .attr("d", area);
 
-  axisGroup.append("g").attr("transform", `translate(0 ${height})`).call(axisX);
-  axisGroup.append("g").call(axisY);
+  groupAxis.append("g").attr("transform", `translate(0 ${height})`).call(axisX);
+  groupAxis.append("g").call(axisY);
 
   const [yearStart, yearEnd] = scaleX.domain().map((d) => timeFormat(d));
   const dataLast = dataStacked[dataStacked.length - 1];
@@ -128,7 +129,7 @@ const visualizeNames = () => {
     .style("visibility", "hidden")
     .style("opacity", "0");
 
-  dataGroup
+  groupData
     .selectAll("path")
     .on("pointerenter", function (e, { key }) {
       d3.select(this).style("filter", "brightness(1.1)");
@@ -145,7 +146,6 @@ const visualizeNames = () => {
       tooltip.style("left", `${e.layerX}px`).style("top", `${e.layerY}px`);
     })
     .on("pointerleave", function () {
-      console.log("!!");
       d3.select(this).style("filter", "brightness(1)");
 
       tooltip
@@ -211,7 +211,8 @@ const highlightNames = () => {
     .area()
     .x(({ data }) => scaleX(data.year))
     .y0(([y0]) => scaleY(y0))
-    .y1(([, y1]) => scaleY(y1));
+    .y1(([, y1]) => scaleY(y1))
+    .curve(d3.curveCatmullRom);
 
   const axisX = d3.axisBottom(scaleX).tickSize(0).tickPadding(12);
   const axisY = d3
@@ -250,10 +251,14 @@ const highlightNames = () => {
 
   clipPath.append("rect").attr("width", width).attr("height", height);
 
-  const dataGroup = group.append("g").attr("id", "clip-path-highlight-names");
-  const axisGroup = group.append("g");
+  const groupData = group.append("g").attr("id", "clip-path-highlight-names");
+  const groupAxis = group.append("g");
 
-  dataGroup
+  const groupLetters = groupData.append("g");
+  const groupOverlay = groupData.append("g");
+  const groupNames = groupData.append("g");
+
+  groupLetters
     .selectAll("path")
     .data(dataStacked)
     .enter()
@@ -261,8 +266,19 @@ const highlightNames = () => {
     .attr("fill", (_, i) => scaleColor(i % dataStacked.length))
     .attr("d", area);
 
-  axisGroup.append("g").attr("transform", `translate(0 ${height})`).call(axisX);
-  axisGroup.append("g").call(axisY);
+  groupOverlay
+    .style("pointer-events", "none")
+    .attr("opacity", "0")
+    .append("rect")
+    .attr("width", width)
+    .attr("height", height);
+
+  groupAxis
+    .append("g")
+    .attr("class", "axis x-axis")
+    .attr("transform", `translate(0 ${height})`)
+    .call(axisX);
+  groupAxis.append("g").attr("class", "axis y-axis").call(axisY);
 
   article.style("position", "relative");
 
@@ -274,7 +290,7 @@ const highlightNames = () => {
     .style("visibility", "hidden")
     .style("opacity", "0");
 
-  dataGroup
+  groupLetters
     .selectAll("path")
     .on("pointerenter", function (e, { key }) {
       d3.select(this).style("filter", "brightness(1.1)");
@@ -291,7 +307,6 @@ const highlightNames = () => {
       tooltip.style("left", `${e.layerX}px`).style("top", `${e.layerY}px`);
     })
     .on("pointerleave", function () {
-      console.log("!!");
       d3.select(this).style("filter", "brightness(1)");
 
       tooltip
@@ -301,11 +316,58 @@ const highlightNames = () => {
         .remove();
     });
 
-  // article
-  //   .append("p")
-  //   .html(
-  //     "Click on one of the areas to to highlight <em>all</em> the names starting with the corresponding letter."
-  //   );
+  groupLetters.selectAll("path").on("click", function (e, d) {
+    const letter = d.key;
+
+    const dataStackedKey = d3
+      .stack()
+      .keys(letters)
+      .value((d, key) => (key === letter ? d[key] : 0))(dataStack);
+
+    scaleY
+      .domain([
+        0,
+        d3.max(dataStackedKey[dataStackedKey.length - 1], ([, m]) => m),
+      ])
+      .nice();
+
+    groupAxis.select(".y-axis").transition().call(axisY);
+    groupLetters
+      .selectAll("path")
+      .data(dataStackedKey)
+      .transition()
+      .attr("d", area);
+
+    tooltip
+      .style("visibility", "hidden")
+      .style("opacity", "0")
+      .selectAll("*")
+      .remove();
+
+    groupOverlay
+      .style("pointer-events", "initial")
+      .on("click", function (e, d) {
+        groupOverlay.style("pointer-events", "none");
+
+        scaleY
+          .domain([
+            0,
+            d3.max(dataStacked[dataStacked.length - 1], ([, m]) => m),
+          ])
+          .nice();
+
+        groupAxis.select(".y-axis").transition().call(axisY);
+        groupLetters
+          .selectAll("path")
+          .data(dataStacked)
+          .transition()
+          .attr("d", area);
+      });
+  });
+
+  article
+    .append("p")
+    .html("Click on one of the areas to to highlight the specific curve.");
 };
 
 (async () => {
