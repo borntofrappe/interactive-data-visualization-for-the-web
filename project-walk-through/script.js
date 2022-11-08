@@ -6,19 +6,6 @@ const timeFormat = d3.timeFormat("%Y");
 const numberFormat = d3.format(",");
 
 const visualizeNames = () => {
-  const names = [];
-  const data = {};
-
-  for (const { year, name, number } of dataset) {
-    if (!names.includes(name)) names.push(name);
-
-    if (data[year]) {
-      data[year][name] = number;
-    } else {
-      data[year] = { year: timeParse(year), [name]: number };
-    }
-  }
-
   const width = 1000;
   const height = 500;
   const margin = {
@@ -28,7 +15,23 @@ const visualizeNames = () => {
     left: 70,
   };
 
-  const dataStack = Object.values(data);
+  const names = dataset
+    .map(({ name }) => name)
+    .reduce(
+      (acc, curr) => (acc.includes(curr) ? [...acc] : [...acc, curr]),
+      []
+    );
+
+  const dataStack = [...d3.group(dataset, (d) => d.year)].map(
+    ([year, values]) => {
+      return Object.assign(
+        {
+          year: timeParse(year),
+        },
+        Object.fromEntries(values.map(({ name, number }) => [name, number]))
+      );
+    }
+  );
 
   const stack = d3
     .stack()
@@ -160,6 +163,7 @@ const highlightNames = () => {
   const names = [];
   const letters = [];
   const data = {};
+  const dataNames = {};
 
   for (const { year, name, number } of dataset) {
     if (!names.includes(name)) names.push(name);
@@ -171,8 +175,11 @@ const highlightNames = () => {
       data[year][letter] = data[year][letter]
         ? data[year][letter] + number
         : number;
+
+      dataNames[year].values.push([name, number]);
     } else {
       data[year] = { year: timeParse(year), [letter]: number };
+      dataNames[year] = { year: timeParse(year), values: [[name, number]] };
     }
   }
 
@@ -186,6 +193,7 @@ const highlightNames = () => {
   };
 
   const dataStack = Object.values(data);
+  console.log(dataStack);
 
   const stack = d3
     .stack()
@@ -335,11 +343,13 @@ const highlightNames = () => {
       ])
       .nice();
 
-    groupAxis.select(".y-axis").transition().call(axisY);
+    const transition = d3.transition().duration(750).ease(d3.easeQuadIn);
+
+    groupAxis.select(".y-axis").transition(transition).call(axisY);
     groupLetters
       .selectAll("path")
       .data(dataStackedKey)
-      .transition()
+      .transition(transition)
       .attr("d", area);
 
     tooltip
@@ -348,25 +358,61 @@ const highlightNames = () => {
       .selectAll("*")
       .remove();
 
-    groupOverlay
-      .style("pointer-events", "initial")
-      .on("click", function (e, d) {
-        groupOverlay.style("pointer-events", "none");
+    transition.on("end", () => {
+      const namesLetter = names.filter((name) => name[0] === letter);
+      console.log(names);
 
-        scaleY
-          .domain([
-            0,
-            d3.max(dataStacked[dataStacked.length - 1], ([, m]) => m),
-          ])
-          .nice();
+      const dataLetter = Object.fromEntries(
+        Object.entries(dataNames).map(([year, data]) => [
+          year,
+          {
+            year: timeParse(year),
+            ...Object.fromEntries(
+              data.values
+                .filter(([name]) => name[0] === letter)
+                .map(([name, number]) => [name, number])
+            ),
+          },
+        ])
+      );
 
-        groupAxis.select(".y-axis").transition().call(axisY);
-        groupLetters
-          .selectAll("path")
-          .data(dataStacked)
-          .transition()
-          .attr("d", area);
-      });
+      console.log(dataLetter);
+      const dataStackedLetter = d3
+        .stack()
+        .keys(namesLetter)
+        .value((d, key) => d[key] || 0)(dataLetter);
+
+      console.log(dataStackedLetter);
+
+      // groupNames
+      //   .selectAll("path")
+      //   .data(dataStackedLetter)
+      //   .enter()
+      //   .append("path")
+      //   .attr("d", area);
+
+      groupOverlay
+        .style("pointer-events", "initial")
+        .on("click", function (e, d) {
+          groupOverlay.style("pointer-events", "none");
+
+          scaleY
+            .domain([
+              0,
+              d3.max(dataStacked[dataStacked.length - 1], ([, m]) => m),
+            ])
+            .nice();
+
+          const transition = d3.transition().duration(750).ease(d3.easeQuadOut);
+
+          groupAxis.select(".y-axis").transition(transition).call(axisY);
+          groupLetters
+            .selectAll("path")
+            .data(dataStacked)
+            .transition(transition)
+            .attr("d", area);
+        });
+    });
   });
 
   article
@@ -386,5 +432,5 @@ const highlightNames = () => {
   header.append("h1").text("Les noms de l'avenir");
 
   visualizeNames();
-  highlightNames();
+  // highlightNames();
 })();
