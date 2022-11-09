@@ -111,14 +111,14 @@
 
   const scaleYDomain = scaleY.domain();
 
-  const scaleColor = d3.scaleOrdinal(d3.schemeSet2);
+  const scaleColor = d3.scaleOrdinal(d3.schemeTableau10);
 
   const area = d3
     .area()
     .x(({ data }) => scaleX(data.year))
     .y0(([y0]) => scaleY(y0))
     .y1(([, y1]) => scaleY(y1))
-    .curve(d3.curveCatmullRom);
+    .curve(d3.curveBumpX);
 
   const axisX = d3.axisBottom(scaleX).tickSize(0).tickPadding(12);
   const axisY = d3
@@ -268,12 +268,13 @@
         .keys(namesLetter)
         .value(() => 0)(dataStackNames);
 
+      const index = groupLetters.selectAll("path").nodes().indexOf(this);
       groupNames
         .selectAll("path")
         .data(dataStackedEmpty)
         .enter()
         .append("path")
-        .attr("fill", (_, i) => scaleColor(i))
+        .attr("fill", (_, i, { length }) => scaleColor(index + length - i - 1))
         .attr("d", area);
 
       transition.on("end", () => {
