@@ -1,16 +1,14 @@
-# Interactive Data Visualizations for the Web
+# Interactive Data Visualization for the Web
 
-> Demos are worth something, at least more than the notes which follow — more a random collection of thoughts.
+Notes jotted down, data visualization created, while reading [Interactive Data Visualization for the Web](https://www.oreilly.com/library/view/interactive-data-visualization/9781491921296/).
 
 ## Introduction
 
-Mapping information to visuals — think mapping larger values to taller bars.
+In a visualization you map information to visuals — think mapping larger values to taller bars.
 
 Why interactive? Why data? Why visualizations? Why the web? Reasons, reasons, reasons, reasons!
 
-A great medium able to convey information with an incredible degree of effectiveness.
-
-Ben Shneiderman "Visual Information-Seeking Mantra": _Overview first, zoom and filter, then details on demand._
+In essence because data visualizations for the web are a great medium able to convey information with an incredible degree of effectiveness.
 
 ## Introducing D3
 
@@ -40,7 +38,7 @@ Dynamic pages. Console, variables, data types, arrays, objects
 
 Arrays as sequence of values. Objects with properties and values.
 
-JSON, JavaScript object notation. GeoJSON, geographic javascript object notation.
+JSON, JavaScript object notation. GeoJSON, geographic JavaScript object notation.
 
 Mathematical operators, comparison operators.
 
@@ -66,17 +64,17 @@ Modify transparency with opacity, or again color values.
 
 ## Setup
 
-Download library from [d3js.org](https://d3js.org/). Reference in `index.html`.
+- download D3 from [d3js.org](https://d3js.org/)
+
+- reference the library from an `.html` document
 
 To work around CORS issues you might need a server. [`live-server`](https://www.npmjs.com/package/live-server) works as a quick workaround.
 
-## Data
+## 01 - Data
 
-Structured information with potential for meaning. Text-based data in different formats: `.txt`, `.csv`, `.json`.
+Data: structured information with potential for meaning. Text-based data in different formats: `.txt`, `.csv`, `.json`.
 
 ### Generate page elements
-
-> refer to the [d3-selection](https://github.com/d3/d3-selection) module
 
 ```js
 d3.select("body").append("p").text("Hello world");
@@ -84,17 +82,17 @@ d3.select("body").append("p").text("Hello world");
 
 Creates a paragraph element and appends the element to the body of the page.
 
-D3 allows to chain functions:
+Chain functions:
 
 - point to the d3 library and object
 
-- use the select method to target the body element — D3 supports any CSS selector with which you are familiar
+- use the `select` method to target the body element — D3 supports any CSS selector with which you are familiar
 
-- use the append method to create the DOM element and add it to the current selection — the body
+- use the `append` method to create the DOM element and add it to the current selection — the body
 
-- add text in the current selection.
+- add text in the element behind the current selection
 
-`append` returns the new element so that the current selection no longer refers to the body, it refers to the paragraph.
+`append` returns the new element so that the current selection refers to the paragraph.
 
 ```js
 const paragraph = d3.select("body").append("p");
@@ -104,7 +102,7 @@ paragraph.text("I said hello!");
 
 ### Bind data
 
-Data visualization, as noted above, focuses on mapping data to visuals.
+Data visualizations, as noted above, focus on mapping data to visuals.
 
 Bind data to DOM elements with `.data()`.
 
@@ -114,7 +112,7 @@ Data, like an array of numbers.
 const dataset = [5, 8, 13, 4, 7];
 ```
 
-- select the desired HTML elements.
+- select the desired HTML elements
 
   ```js
   d3.select("body").selectAll("p");
@@ -136,9 +134,9 @@ const dataset = [5, 8, 13, 4, 7];
   d3.select("body").selectAll("p").data(dataset).enter();
   ```
 
-  `enter` looks at the current — empty — selection and the data values. With more values than DOM elements, the function creates a placeholder element.
+  `enter` looks at the current — empty — selection and the data values. With more values than DOM elements, the function creates placeholder elements.
 
-- append the DOM node
+- add the desired HTML element
 
   ```js
   d3.select("body").selectAll("p").data(dataset).enter().append("p");
@@ -157,17 +155,15 @@ const dataset = [5, 8, 13, 4, 7];
 
   Functions like `text`, `attr`, or again `style` accept a value or an anonymous function. Bound to data, the anonymous function receives as argument the datum.
 
-_Note_: in the demo I append the paragraphs in a `div` container to separate the elements from the previous paragraphs. The choice will become clear in the context of the update-enter-exit selections from a future chapter.
-
 ---
 
 Debugging notes:
 
 - `d3.selectAll("p")` returns an object with a `_groups` and `_parents` array
 
-- `_groups` contains a NodeList array
+- `_groups` contains a `NodeList` array
 
-- the NodeList array contains the bound DOM nodes
+- the `NodeList` array contains the bound DOM nodes
 
 - the nodes each have a `__data__` attribute with the data values
 
@@ -175,11 +171,9 @@ Debugging notes:
 
 ### Data sources
 
-> refer to the [d3-dsv](https://github.com/d3/d3-dsv) module
+Beyond a simple array retrieve the data from a `.csv`, `.tsv`, `.json` files.
 
-Beyond a simple array you could retrieve the data from a `.csv`, `.tsv`, `.json` file.
-
-Functions from the D3 library return a promise so that you instruct what to do with the data once the data is fetched.
+`d3.csv`, `d3.tsv`, `d3.json` return a promise so that you instruct what to do with the data once the data is fetched.
 
 ```js
 d3.csv("dataset.csv").then((dataset) => {
@@ -187,7 +181,7 @@ d3.csv("dataset.csv").then((dataset) => {
 });
 ```
 
-With a `.csv` file the first row is treated as the key's row.Values are also included as string.
+With a `.csv` file the first row is treated as the key's row. What is more, values are also included as string.
 
 It is possible to customize the conversion, for instance passing a function as a second argument.
 
@@ -200,11 +194,11 @@ d3.csv("dataset.csv", (d) => ({
 });
 ```
 
-## Drawing with data
+## 02 - Drawing with data
 
 ### HTML
 
-Using div elements, directly with D3 and the style method.
+Draw bars with `<div>` elements and the `style` method.
 
 ```js
 // bound data
@@ -214,12 +208,19 @@ Using div elements, directly with D3 and the style method.
   .style("display", "inline-block")
 ```
 
-With the attr method assign a class to style the bars with CSS. Ultimately use D3 for the properties which depend on the data.
+With the `attr` method assign a class to style the bars with CSS.
 
 ```js
 // bound data
 .append("div")
   .attr("class", "bar")
+```
+
+Use D3 for the properties which depend on the data.
+
+```js
+// bound data
+.append("div")
   .style("height", (d) => `${20 + d}px`)
 ```
 
@@ -237,7 +238,11 @@ The anonymous function of a bound element receives the datum as the first argume
 
 The coordinate system with SVG works from the top left corner, with increasing x values moving the system to the right, increasing y values to the bottom.
 
-_Note_: I use a bit of SVG trickery to size the vector graphic with the `viewBox` instead of `width` and `height` attributes. With the `viewBox` the width matches the number of data points so that you can give a width of 1 — minus the margin — on a single data point. The height matches the maximum value so that you can use the value directly to size the bars. The trickery will be less relevant once you introduce _scales_.
+---
+
+I use a bit of SVG trickery to size the vector graphic with the `viewBox` instead of `width` and `height` attributes. With the `viewBox` the width matches the number of data points so that you can give a width of 1 — minus the margin — on a single data point. The height matches the maximum value so that you can use the value directly to size the bars. The trickery will be less relevant once you introduce _scales_.
+
+---
 
 ### Visualizations
 
@@ -248,19 +253,19 @@ Draw a bar chart with rectangles side by side. Draw a scatter plot over two dime
 +.attr("r", (value) => Math.sqrt(value))
 ```
 
-Scaling the radius tends to skew the perception of change, of the variation of values giving too much importance to large data points.
+Scaling the radius tends to skew the perception of change giving too much importance to large data points.
 
-## Scales
+## 03 - Scales
 
-Functions which map from input domain to output range.
+Scales: functions which map from input domain to output range.
 
 The problem: you don't know the values ahead of time, but you want to have them positioned/sized/styled according to known values.
 
-D3's approach: set a domain and a range so that the unknown values fit in the known metrics.
+D3's approach: set a domain and a range so that the unknown values are mapped to the known metrics.
 
 Scales have no visual representation, they are just mathematical relations.
 
-d3.scaleLinear maps values linearly — by default an identity scale returning the input value.
+`d3.scaleLinear` maps values linearly — by default an identity scale returning the input value.
 
 ```js
 d3.scaleLinear();
@@ -274,61 +279,51 @@ const scale = d3.scaleLinear().domain([0, 10]).range([0, 100]);
 scale(8); // 80
 ```
 
-Use `d3.min`, `max` and `extent` to rapidly find the minimum, maximum, both values from the input data. Pass an accessor function to consider a value in the input collection instead of the index — default.
+Use `d3.min`, `d3.max` and `d3.extent` to rapidly find the minimum, maximum, both values from the input data. Pass an accessor function to consider a value in the input collection instead of the index — default.
 
 ```js
 d3.max(dataset, ([x]) => x);
 ```
 
-Additional methods allow to customize the scale
+Additional methods allow to customize the scale:
 
-- `nice()` rounds the ends of the input domain
+- `nice()`: round the ends of the input domain
 
-- `rangeRound()` instead of range rounds the values returned by the scale
+- `rangeRound()`: (instead of range) round the values returned by the scale
 
-- `clamp()` ensures the scale function doesn't return a value outside of the input domain
+- `clamp()`: ensure the scale function doesn't return a value outside of the input domain
 
-Past linearScale there are several scaling functions.
+Past `linearScale` there are several scaling functions.
 
-- `scaleSqrt`, square root
+- `scaleSqrt`: square root
 
-- `scalePow`, power
+- `scalePow`: power
 
-- `scaleLog`, logarithmic
+- `scaleLog`: logarithmic
 
-- `scaleQuantize`, outputting to discrete values, buckets
+- `scaleQuantize`: continuous domain, discrete range; output values to one of the possible buckets
 
-- `scaleQuantile`, from discrete values to discrete values, buckets to buckets
+- `scaleQuantile`: discrete domain, discrete range; buckets to buckets
 
-- `scaleOrdinal`, non quantitative output, such as categories
+- `scaleOrdinal`: non quantitative output; such as categories
 
-- `scaleTime`, input dates
+- `scaleTime`: input dates
 
-- `schemeCategory10`, `schemeCategory20`, `schemeCategory20b`, `schemeCategory20c`; presets which output to categorical colors
+- `schemeCategory10`, `schemeCategory20`, `schemeCategory20b`, `schemeCategory20c`: presets which output to categorical colors
 
 The root scale helps to size the circle's radius, so to consider the area.
 
-The time scale helps to work with scales, alongside other methods to convert string to Date objects and format Date objects with friendlier labels:
+The time scale helps to work with scales, alongside other methods to convert string to `Date` objects and format `Date` objects with friendlier labels:
 
-- `d3.timeParse("")`; from string to date
+- `d3.timeParse("")`: from string to date
 
-- `d3.timeFormat("")`; from date to string
+- `d3.timeFormat("")`: from date to string
 
 The input string illustrates the [format](https://github.com/d3/d3-time-format#locale_format) for both functions.
 
-## Axes
+## 04 - Axes
 
-Axes are functions which do not return something, but generate visual elements. Think line, labels, ticks.
-
-Intended for SVG, since the generated elements are `<line>`, `<path>` and `<text>`.
-
-```pseudo
-d3
-  .axisTop
-  .axisBottom
-  .axisLeft
-  .axisRight
-```
+Axes are functions which do not return something, but generate visual elements. Think line, labels, ticks. They are meant for SVG, since the generated elements are `<line>`, `<path>` and `<text>`.
 
 At minimum reference a scale.
 
@@ -377,7 +372,7 @@ Format tick labels with `tickFormat()`. Similarly to `d3.timeFormat()` use `d3.f
 .tickFormat(d => d3.format(".1%")(d))
 ```
 
-## Updates, Transitions, and Motion
+## 05 - Updates Transitions and Motion
 
 Updates: how you handle data changes.
 
@@ -399,7 +394,7 @@ Use `scale.bandwidth()` to retrieve the width of a band.
 
 ### Interaction
 
-Use the `.on` method on a D3 selection. First argument describes the event, second argument a callback.
+Use the `.on` method on a D3 selection. The first argument describes the event, the second argument a callback.
 
 ```js
 viz
@@ -434,7 +429,7 @@ groups
 
 ### Transitions
 
-Add the transition() method _before_ the affected properties/attributes.
+Add the `transition()` method _before_ the affected properties/attributes.
 
 ```js
 groups
@@ -489,7 +484,7 @@ axisGroup.select(".y-axis").transition().duration(500).call(yAxis);
 
 ### Transition events
 
-Use the `.on` method to tap into the phases of the transition. `start` describes the beginning of the transition, `end` opposite end.
+Use the `.on` method to tap into the phases of the transition. `start` describes the beginning of the transition, `end` its conclusion.
 
 ```js
 groups
@@ -505,7 +500,7 @@ groups
   .attr("height", (d) => height - yScale(d));
 ```
 
-Be warned that D3 interpolates the values of one transition at a time, the last one. If you start a new one, it takes over existing changes.
+Be warned that D3 interpolates the values of one transition at a time, the last one. If you start a new one, it interrupts any existing transition.
 
 You can have a transition on the callback at the `end` event, but D3 allows to chain transitions by adding multiple transition methods.
 
@@ -520,13 +515,13 @@ groups
   .attr("height", (d) => height - yScale(d));
 ```
 
-### Clip aside
+### Clip
 
 Use a `clipPath` element to have visuals clipped to a specific area — relevant if you decide to animate values out the visible area before removing them, or positioning them in the visible area after adding them outside of it.
 
 ### Update selections
 
-> the function modifies the visualization to assign a unique identifier to the data points
+> `vizUpdateSelections` modifies the visualization to assign a unique identifier to the data points
 
 Data might be variable not only in value, but in number. In this instance you may need to add/remove DOM nodes.
 
@@ -555,7 +550,11 @@ Merge the enter and update selection if the two share properties you want to cha
 selection.enter().append("g").merge(selection).attr("x"); // ...
 ```
 
-_Note_: in the demo I ultimately chose to keep the selections separate to manage the data flow. If a data point is added the function introduces the new node and only afterwards it updates the position of the previous elements, if necessary. If a data point is removed the function removes the element and, once transitioned and removed, it repeats the same kind of update.
+---
+
+In the demo I ultimately chose to keep the selections separate to manage the data flow. If a data point is added the function introduces the new node and only afterwards it updates the position of the previous elements, if necessary. If a data point is removed the function removes the element and, once transitioned and removed, it repeats the same kind of update.
+
+---
 
 ### Data joins with keys
 
@@ -571,13 +570,9 @@ Refer to the key in the second argument of the data method, a callback function 
 
 Once you remove a data point on the basis of a key you remove the matching node, no longer the last one.
 
-## Interactivity
+## 06 - Interactivity
 
-As per the previous demo:
-
-- bind event listener
-
-- define behavior with a callback function
+As per the previous demo bind event listener and define behavior with a callback function.
 
 ```js
 d3.select("button").on("click", () => {});
@@ -652,7 +647,9 @@ d3.selectAll("g").interrupt("fill");
 
 ### Tooltips
 
-Overlays with additional information. Details.
+Tooltips: overlays with additional information.
+
+You have several options:
 
 1. browser default: `<title>` element
 
@@ -664,9 +661,9 @@ For specific coordinates consider [`d3.pointer`](https://github.com/d3/d3-select
 
 Beyond mouse events, consider touch events such as `touchstart` and `touchend`.
 
-## Paths
+## 07 - Paths
 
-Helper D3 functions to generate the syntax for the `d` attribute of `<path>` elements.
+D3 offers helper D3 functions to generate the syntax for the `d` attribute of `<path>` elements.
 
 ### Line
 
@@ -731,7 +728,7 @@ const area1 = d3
   .y1((d) => yScale(d.value));
 ```
 
-## Selections
+## 08 - Selections
 
 ### Properties
 
@@ -780,8 +777,6 @@ d3.select("svg")
 ```
 
 The `.select()`, `.selectAll()` and `.append()` methods hand off the new selection to the methods which follow. Other methods such as `.attr()` and `.text()` do not.
-
-One way to differentiate selections is through indentation.
 
 ### Storing selections
 
@@ -881,7 +876,7 @@ Helps to avoid repeating the same condition in multiple methods.
 
 ### Each
 
-Use the .each method to run a function on each node of the current selection.
+Use the _.each_ method to run a function on each node of the current selection.
 
 ```js
 groups.selectAll("rect").each((d) => {
@@ -889,15 +884,15 @@ groups.selectAll("rect").each((d) => {
 });
 ```
 
-## Layouts
+## 09 - Layouts
 
 D3 maps, transforms data for you to lay out. As with the line function, D3 does not draw the line, but gives you the syntax for the `d` attribute of the `<path>` element.
 
 ### Pie
 
-Use the `pie` function to compute the start and end angle of the slices.
+- use the `pie` function to compute the start and end angle of the slices
 
-Use the `arc` function to take a start and end angle, as well inner and outer radius, to produce the syntax for the `d` attribute of `<path>` elements.
+- use the `arc` function to take a start and end angle, as well inner and outer radius, to produce the syntax for the `d` attribute of `<path>` elements
 
 With the bound data invoke the arc function for the `d` attribute.
 
@@ -915,7 +910,7 @@ The data is passed automatically so that the following lines achieve the same go
 .attr('d', d => arc(d))
 ```
 
-Set an inner radius greater than zero for a donut chart.
+Set an inner radius greater than zero for a doughnut chart.
 
 Position labels with `arc.centroid(d)`. The function computes the center point of any shape for the specific arc function.
 
@@ -925,7 +920,9 @@ The actual data is stored in the `d.value` field.
 .text(d => d.value)
 ```
 
-A note on the _order_ of the slices: the pie-d data computes the start and end angle so that the larger value starts at angle 0 and moves clockwise. It does **not** modify the order of the values in the array.
+---
+
+Pay attention to the _order_ of the slices: the pie-d data computes the start and end angle so that the larger value starts at angle 0 and moves clockwise. It does **not** modify the order of the values in the array.
 
 ```js
 console.log(dataset);
@@ -940,9 +937,13 @@ If you assign colors on the basis of index and want to ensure the first color go
 dataset.sort((a, b) => b - a);
 ```
 
+---
+
 ### Colors
 
-D3 provides arrays of colors such as `d3.schemeCategory10`. Include the values in an ordinal scale to map index values to one of the colors from the array.
+D3 provides arrays of colors such as `d3.schemeCategory10`.
+
+Include the values in an ordinal scale to map index values to one of the colors from the array.
 
 ```js
 const scaleColor = d3.scaleOrdinal(d3.schemeCategory10);
@@ -950,7 +951,7 @@ const scaleColor = d3.scaleOrdinal(d3.schemeCategory10);
 
 ### Stack
 
-Stack function converts 2D data to stacked data. Adds a baseline so you can draw columns, areas.
+The stack function converts 2D data to stacked data. D3 adds a baseline so you can draw columns, areas.
 
 Assume an array of objects, each describing the values with a series of properties, keys.
 
@@ -965,10 +966,10 @@ const data = [
 Describe the keys on which to stack the data with the keys method.
 
 ```js
-const stack = d3.stack().keys(['Germany', 'Sweden', 'France]);
+const stack = d3.stack().keys(["Germany", "Sweden", "France"]);
 ```
 
-D3 transforms the data to a two dimensional array, with the baseline and value added to said baseline. Use the two to draw visuals.
+D3 transforms the data into a two dimensional array, with the baseline and value added to said baseline. Use the two to draw visuals.
 
 ```js
 [
@@ -981,7 +982,7 @@ D3 transforms the data to a two dimensional array, with the baseline and value a
 ],
 ```
 
-The challenge is mapping the values with the horizontal and vertical scale/dimension
+The challenge is mapping the values with the horizontal and vertical scale/dimension.
 
 For the stacked columns bind the stacked data to group elements. The first set of arrays refer to the values for each category, so it is safe to set a fill color, shared by all visuals with the same key.
 
@@ -1006,7 +1007,11 @@ dataGroups
 
 In this instance `d` refers to the 2D array with the cumulative values (and the `data` property with the values for the keys).
 
-For the area the process is similar, but here you need to map the values through the area function `.x()` and `.y()` methods. In the demo I use the year value for the horizontal coordinate, the two cumulative values for the vertical coordinates, start and end.
+For the area the process is similar, but here you need to map the values through the area function `.x()` and `.y()` methods.
+
+---
+
+The demo leans on the year value for the horizontal coordinate, the two cumulative values for the vertical coordinates.
 
 ```js
 const area = d3
@@ -1030,7 +1035,9 @@ const dataGroups = dataGroup
 
 In this manner the area function receives the array of values for the separate categories.
 
-By default data is stacked per the keys array. Use a different logic with the order method and functions such as d3.stackOrderAscending, placing the values from smaller to larger (these might have undesired effects if you were to color the stacks on the basis of index).
+---
+
+By default data is stacked per the keys array. Use a different logic with the order method and functions such as _d3.stackOrderAscending_, placing the values from smaller to larger (changing the order might have undesired effects if you were to color the stacks on the basis of index).
 
 ### Force
 
@@ -1053,7 +1060,7 @@ const links = [
 
 The goal is to plot the nodes and connections, for instance with circles and lines. This is achieved in two steps:
 
-1. draw the necessary visuals, in the demo circle, text and path elements
+1. draw the necessary visuals
 
 2. run a simulation to update the elements' position
 
@@ -1065,13 +1072,13 @@ const force = d3.forceSimulation(nodes);
 
 Add forces to change the nodes position.
 
-Forces are connected to D3 functions from the force module. Forces such as
+Forces are connected to D3 functions from the _d3-force_ module. Forces such as:
 
-- charge, push nodes away from (-) or toward (+) each other. Repulsion v attraction
+- charge: push nodes away from (-) or toward (+) each other
 
-- link, connect nodes together (this is the purpose of the links array)
+- link: connect nodes together (consider the links array)
 
-- center, push the nodes toward a specific x and y coordinate
+- center: push the nodes toward a specific x and y coordinate
 
 ```js
 const force = d3
@@ -1142,7 +1149,7 @@ nodesGroups.style("cursor", "grab").call(drag);
 
 As repeated later in the geomapping section, `call` executes the input function — in this instance `drag` — passing the current selection — the group elements storing the nodes — as argument.
 
-Importantly, call the drag function **on the same** element which you update following the `tick` event — `nodesGroups`. In a previous version I called the function on the circle element which I superimposed on the node.
+Importantly, call the drag function **on the same** element which you update following the `tick` event — `nodesGroups`. In a previous version I called the function on circle element which I superimposed on the node.
 
 ```js
 nodesGroups.append("circle").attr("r", 20).attr("opacity", "0").call(drag);
@@ -1168,7 +1175,7 @@ The functions each receive the event as the first argument, the bound datum as t
   if (e.active === 0) force.alphaTarget(0.1).restart();
   ```
 
-  `e.active` is 0 when the drag operation has started yet, 1 when it is indeed ongoing
+  `e.active` is 0 when the drag operation has not started, 1 when it is indeed ongoing
 
 - when the drag action ends set the `alphaTarget` to 0
 
@@ -1186,11 +1193,15 @@ The functions each receive the event as the first argument, the bound datum as t
   })
   ```
 
+---
+
 About `alphaTarget`: D3 runs the simulation on the basis of an alpha value. This value decreases over time toward `alphaTarget` and stops when the value is smaller than or equal to `alphaMin`. Therefore, if `alphaTarget` is greater than `alphaMin` the simulation continues indefinitely.
 
 When the drag action starts you increase `alphaTarget` _and_ restart the animation so that the nodes and edges can move. When the action ends you set it back to 0 to eventually end the simulation.
 
-## Geo Mapping
+---
+
+## 10 - Geomapping
 
 Use GeoJSON, a specific format of JSON syntax which summarizes geographical data — think map coordinates.
 
@@ -1256,7 +1267,7 @@ Given a dataset describing large cities as well as the population and coordinate
 const [x, y] = projection([d.lon, d.lat]);
 ```
 
-The projection function receives an array with the longitude and latitude. Based on the two values the function returns the x and y coordinates.
+The projection function receives an array with the longitude and latitude. Based on the two input values the function returns the x and y coordinates.
 
 ### Pan
 
@@ -1287,7 +1298,7 @@ svg
   .style("cursor", "pointer");
 ```
 
-On the rectangle use the call method to pass a drag function - see past the snippet. As with the axis function call executes the input function with the current selection - the rectangle.
+On the rectangle use the `call` method to pass a drag function - see past the snippet. As with the axis function `call` executes the input function with the current selection - the rectangle.
 
 ```js
 svg.append("rect").call(drag);
@@ -1331,7 +1342,7 @@ const zoom = d3.zoom().on("zoom", function (e) {
 });
 ```
 
-Unlike the dragging feature, d3.zoom stores the zoom value _in_ the node. Consider how there might be different sections of the visualization at different levels of depth.
+Unlike the dragging feature, `d3.zoom` stores the zoom value _in_ the node. Consider how there might be different sections of the visualization at different levels of depth.
 
 Retrieve the zoom value of a node with `d3.zoomTransform()` passing the node as argument (the property itself is stored in the `__zoom` field).
 
@@ -1353,7 +1364,7 @@ Update the scale similarly to how you update the translate portion of the same p
 projection.translate([x, y]).scale(k * initialScale);
 ```
 
-A note on the translated values. The projection has initial values for the `x` and `y` coordinates, meaning the map would immediately jump to the top left corner as the projection contemplates `e.transform.x` and `e.transform.y` as starting from 0. To compensate for this, and on the basis of the desired, initial translation, invoke an additional function to update the values.
+Regarding the translated values: the projection has initial values for the `x` and `y` coordinates, meaning the map would immediately jump to the top left corner as the projection contemplates `e.transform.x` and `e.transform.y` as starting from 0. To compensate for this, and on the basis of the desired, initial translation, invoke an additional function to update the values.
 
 ```js
 const [initialX, initialY] = projection.translate();
@@ -1366,7 +1377,7 @@ svg
 
 In this manner `e.transform.x` and `e.transform.y` start from the same coordinate set on the first projection.
 
-`d3.zoomIdentity` provides an identity transform. one where the scaling factor `k` is 1 and the two coordinates are 0. Consider it a default, a basis transform on top of which you set the desired scale and translate values.
+`d3.zoomIdentity` creates an identity transform object. one where the scaling factor `k` is 1 and the two coordinates are 0. Consider it a default, a basis transform on top of which you set the desired scale and translate values.
 
 Listening to the `zoom` covers mouse and touch interaction. To reproduce the buttons from the pan section, which update the position by an arbitrary amount, update the zoom directly with the `.translateBy()` method.
 
@@ -1406,11 +1417,9 @@ const zoom = d3
 
 ### Geographical data
 
-General information on creating maps:
-
 - you need shapefiles with coordinates data; consider [Natural Earth](https://www.naturalearthdata.com/) or more specific sources like the [US states census](https://www.census.gov/geographies/mapping-files.html)
 
-- pick appropriate resolution
+- pick an appropriate resolution
 
 - simplify shapes; consider tools such as [mapshaper](https://mapshaper.org/)
 
@@ -1418,11 +1427,11 @@ General information on creating maps:
 
   TopoJSON stores topologies, not geometries, and makes for a more efficient format. If you do choose the format know that ultimately you need the `topojson` library to turn the syntax into the GeoJSON values which D3 understands.
 
-- choose a [projection](https://github.com/d3/d3-geo#projections); different maps require different projects. geoAlbersUS might be perfect to highlight the US states, but geoMercator might be a better fit for the world's countries
+- choose a [projection](https://github.com/d3/d3-geo#projections); different maps require different projects. `geoAlbersUS` might be perfect to highlight the US states, but `geoMercator` might be a better fit for the world's countries
 
-## Project Walk-through
+## 11 - Project Walk-through
 
-The last chapter focuses on an interactive, stacked area chart. The end result is a visualization where you are presented with electric car vehicle by type. Click on one of the few types to have the other collapse, and the chosen type broken down in car model.
+The last chapter focuses on an interactive, stacked area chart. The end result is a visualization highlighting electric cars by type. Click on one of the few types to have the other collapse, and the chosen type broken down in car model.
 
 Instead of creating the same plot, I prefer to practice with a different dataset and overall structure.
 
