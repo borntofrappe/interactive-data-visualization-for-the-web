@@ -77,7 +77,7 @@ const drawScatterPlot = () => {
     .append("circle")
     .attr("fill", "hsl(0, 0%, 70%)")
     .attr("cx", ([x]) => x)
-    .attr("cy", ([, y]) => y)
+    .attr("cy", ([, y]) => height - y)
     .attr("r", radius);
 
   svg
@@ -86,8 +86,8 @@ const drawScatterPlot = () => {
     .enter()
     .append("text")
     .attr("x", ([x]) => x)
-    .attr("y", ([, y]) => y - radius - 2)
-    .text(([x, y]) => `${x}:${y}`)
+    .attr("y", ([, y]) => height - y - radius - 2)
+    .text(([x, y]) => `${x},${y}`)
     .attr("font-size", 9)
     .attr("text-anchor", "middle")
     .attr("font-family", "sans-serif")

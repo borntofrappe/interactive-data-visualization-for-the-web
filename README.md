@@ -1429,7 +1429,7 @@ const zoom = d3
 
 - choose a [projection](https://github.com/d3/d3-geo#projections); different maps require different projects. `geoAlbersUS` might be perfect to highlight the US states, but `geoMercator` might be a better fit for the world's countries
 
-## 11 - Project Walk-through
+## 11 - Project walk-through
 
 The last chapter focuses on an interactive, stacked area chart. The end result is a visualization highlighting electric cars by type. Click on one of the few types to have the other collapse, and the chosen type broken down in car model.
 
